@@ -24,7 +24,12 @@ class AuthService {
   Future<AuthResult> authenticate(String reason) async {
     if (kIsWeb) return const AuthResult(granted: true);
     try {
-      final granted = await _auth.authenticate(localizedReason: reason);
+      final granted = await _auth.authenticate(
+        localizedReason: reason,
+        // Sans cela, une notification qui met l'application en pause annule la
+        // demande en cours et l'utilisateur croit à un refus.
+        persistAcrossBackgrounding: true,
+      );
       return AuthResult(granted: granted);
     } catch (error) {
       return AuthResult(granted: false, error: error.toString());

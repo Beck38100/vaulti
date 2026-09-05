@@ -81,6 +81,9 @@ class BackupCrypto {
   /// même de pouvoir tenter le déchiffrement.
   List<int> saltOf(String envelope) {
     final header = _parse(envelope);
+    // Vérifié ici : dériver la clé coûte près d'une seconde, autant refuser
+    // une enveloppe illisible avant de la payer.
+    _checkVersion(header);
     final salt = header['salt'];
     if (salt is! String) {
       throw const BackupDecryptException('Ce fichier n’est pas une sauvegarde Vaulti.');
@@ -92,13 +95,7 @@ class BackupCrypto {
   /// incorrecte ou si le fichier a été modifié.
   Future<String> decrypt({required String envelope, required SecretKey key}) async {
     final header = _parse(envelope);
-
-    final version = header['version'];
-    if (version is! int || version > formatVersion) {
-      throw const BackupDecryptException(
-        'Cette sauvegarde a été créée avec une version plus récente de Vaulti.',
-      );
-    }
+    _checkVersion(header);
 
     try {
       final box = SecretBox(
@@ -118,6 +115,20 @@ class BackupCrypto {
       throw const BackupDecryptException('Ce fichier n’est pas une sauvegarde Vaulti.');
     } on TypeError {
       throw const BackupDecryptException('Ce fichier n’est pas une sauvegarde Vaulti.');
+    }
+  }
+
+  /// Refuse une enveloppe qu'on ne sait pas relire, en distinguant le fichier
+  /// étranger de la sauvegarde écrite par une version plus récente.
+  void _checkVersion(Map<String, dynamic> header) {
+    final version = header['version'];
+    if (version is! int) {
+      throw const BackupDecryptException('Ce fichier n’est pas une sauvegarde Vaulti.');
+    }
+    if (version > formatVersion) {
+      throw const BackupDecryptException(
+        'Cette sauvegarde a été créée avec une version plus récente de Vaulti.',
+      );
     }
   }
 

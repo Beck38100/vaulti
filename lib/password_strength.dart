@@ -39,6 +39,17 @@ PasswordStrength evaluatePassword(String password) {
     );
   }
 
+  // Un mot de passe trop connu se casse en quelques secondes, quelle que soit
+  // sa composition : le barème par variété de caractères n'a alors aucun sens.
+  if (_isTooCommon(password)) {
+    return const PasswordStrength(
+      score: .25,
+      label: 'Faible',
+      color: AppColors.warning,
+      hint: 'Trop courant : il figure en tête des listes d’attaque',
+    );
+  }
+
   var points = 0;
   if (password.length >= 8) points++;
   if (password.length >= 12) points++;
@@ -77,4 +88,37 @@ PasswordStrength evaluatePassword(String password) {
     color: AppColors.security,
     hint: 'Bonne longueur et bonne variété',
   );
+}
+
+/// Mots de passe si répandus qu'ils sont essayés en premier lors d'une attaque.
+/// Liste volontairement courte : elle vise les cas manifestes, pas l'exhaustivité.
+const _commonPasswords = {
+  'password', 'motdepasse', 'passe', 'azerty', 'qwerty', 'iloveyou', 'admin',
+  'welcome', 'bienvenue', 'soleil', 'chouchou', 'doudou', 'loulou', 'secret',
+  'letmein', 'monkey', 'dragon', 'football', 'princesse', 'bonjour', 'vaulti',
+};
+
+/// Suites de touches ou de caractères saisies d'un seul geste.
+const _sequences = [
+  'azertyuiopqsdfghjklmwxcvbn',
+  'qwertyuiopasdfghjklzxcvbnm',
+  'abcdefghijklmnopqrstuvwxyz',
+  '01234567890',
+  '09876543210',
+];
+
+/// Vrai pour un mot de passe deviné sans effort, indépendamment de sa longueur.
+bool _isTooCommon(String password) {
+  final lower = password.toLowerCase();
+
+  // « password123 », « azerty2024 » : un suffixe chiffré ne protège de rien.
+  final core = lower.replaceAll(RegExp(r'[0-9!@#\$%^&*._\-]+$'), '');
+  if (_commonPasswords.contains(lower) || _commonPasswords.contains(core)) return true;
+
+  // Un seul caractère répété, ou uniquement des chiffres.
+  if (RegExp(r'^(.)\1*$').hasMatch(password)) return true;
+  if (RegExp(r'^[0-9]+$').hasMatch(password)) return true;
+
+  // Le mot de passe entier n'est qu'un morceau d'une suite connue.
+  return _sequences.any((sequence) => sequence.contains(lower));
 }

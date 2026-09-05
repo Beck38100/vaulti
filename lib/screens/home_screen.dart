@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:file_picker/file_picker.dart';
@@ -13,6 +12,7 @@ import '../backup_service.dart';
 import '../dialogs.dart';
 import '../models.dart';
 import '../screen_security.dart';
+import '../secure_clipboard.dart';
 import '../theme.dart';
 import '../vault_repository.dart';
 import '../vault_stats.dart';
@@ -38,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final _repository = const VaultRepository();
   final _auth = AuthService();
   final _screenSecurity = const ScreenSecurity();
+  final _clipboard = const SecureClipboard();
   final _backup = const BackupService();
   final _vaultSearchController = TextEditingController();
 
@@ -68,8 +69,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Timer? _revealTimer;
   Timer? _clipboardTimer;
 
-  /// Dernier mot de passe copié et échéance de son effacement.
-  String? _copiedPassword;
+  /// Échéance d'effacement du dernier mot de passe copié.
   DateTime? _clipboardDueAt;
 
   /// Un mot de passe révélé est remasqué au bout de ce délai.
@@ -83,10 +83,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _loadVault();
     _loadUserName();
     _loadSecuritySettings();
-    _loadBackupKey();
+    _openVault();
+  }
+
+  /// Le coffre local doit être lu avant la clé de sauvegarde : c'est son
+  /// contenu qui décide s'il faut proposer une restauration. Lancés en
+  /// parallèle, ces deux chargements pourraient réclamer le mot de passe de
+  /// sauvegarde alors que le coffre est déjà rempli.
+  Future<void> _openVault() async {
+    await _loadVault();
+    await _loadBackupKey();
   }
 
   @override
@@ -400,23 +408,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future<void> _copyPassword(VaultEntry entry) async {
     final result = await _authenticate('Authentifie-toi pour copier ce mot de passe');
     if (!mounted || !result.granted) return;
-    final copied = entry.password;
-    await Clipboard.setData(ClipboardData(text: copied));
+    await _clipboard.copy(entry.password);
     if (!mounted) return;
-    _scheduleClipboardWipe(copied);
+    _scheduleClipboardWipe();
     _showMessage('Copié — le presse-papiers sera vidé dans 45 secondes.');
   }
 
   /// Vide le presse-papiers après un délai, sauf si l'utilisateur a copié
   /// autre chose entre-temps : on ne veut pas effacer son contenu à lui.
-  void _scheduleClipboardWipe(String copied) {
+  void _scheduleClipboardWipe() {
     _clipboardTimer?.cancel();
-    _copiedPassword = copied;
     _clipboardDueAt = DateTime.now().add(_clipboardDuration);
     _clipboardTimer = Timer(_clipboardDuration, _wipeClipboard);
   }
 
-  /// Android interdit à une application en arrière-plan de lire le
+  /// Android interdit à une application en arrière-plan de toucher au
   /// presse-papiers : si le délai expire pendant que l'utilisateur est ailleurs
   /// (le cas normal, il va coller son mot de passe), l'effacement échoue
   /// silencieusement. On réessaie donc au retour dans l'application.
@@ -426,12 +432,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _wipeClipboard() async {
-    final copied = _copiedPassword;
-    if (copied == null) return;
-    final current = await Clipboard.getData(Clipboard.kTextPlain);
-    if (current?.text != copied) return; // l'utilisateur a copié autre chose
-    await Clipboard.setData(const ClipboardData(text: ''));
-    _copiedPassword = null;
+    if (_clipboardDueAt == null) return;
+    await _clipboard.clearIfOurs();
     _clipboardDueAt = null;
   }
 

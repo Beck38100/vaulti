@@ -148,7 +148,13 @@ Future<EntryDraft?> showPasswordForm(
         ]),
       ),
     ),
-  );
+  ).whenComplete(() {
+    // Libère les champs : ils portent le mot de passe saisi.
+    titleCtrl.dispose();
+    userCtrl.dispose();
+    passCtrl.dispose();
+    commentCtrl.dispose();
+  });
 }
 
 /// Formulaire d'une note (création et modification).
@@ -222,7 +228,11 @@ Future<EntryDraft?> showNoteForm(
         ]),
       ),
     ),
-  );
+  ).whenComplete(() {
+    // Le contenu de la note reste en mémoire tant que les champs vivent.
+    titleCtrl.dispose();
+    contentCtrl.dispose();
+  });
 }
 
 /// Choix d'un dossier de destination. Renvoie une chaîne vide pour la racine.

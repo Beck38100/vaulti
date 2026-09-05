@@ -25,6 +25,7 @@ lib/
   password_strength.dart    calcul de solidité (source unique)
   auth_service.dart         biométrie
   screen_security.dart      blocage des captures d'écran (FLAG_SECURE)
+  secure_clipboard.dart     copie marquée sensible, effacement du presse-papiers
   backup_crypto.dart        chiffrement de la sauvegarde
   backup_service.dart       fichier de sauvegarde et restauration
   dialogs.dart              regroupe lib/dialogs/ (voir l'en-tête du fichier)
@@ -39,7 +40,7 @@ seuls, et c'est ce que fait `test/`.
 
 ```bash
 flutter pub get
-flutter test          # 37 tests
+flutter test          # 39 tests
 flutter analyze
 flutter run
 ```

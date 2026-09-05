@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:password_app/models.dart';
-import 'package:password_app/password_strength.dart';
-import 'package:password_app/vault_stats.dart';
+import 'package:vaulti/models.dart';
+import 'package:vaulti/password_strength.dart';
+import 'package:vaulti/vault_stats.dart';
 
 VaultEntry password(String title, String value) =>
     VaultEntry(id: title, type: VaultItemType.password, title: title, password: value);
@@ -19,9 +19,22 @@ void main() {
     });
 
     test('un mot de passe moyen n’est ni faible ni solide', () {
-      final result = evaluatePassword('azertyuiop');
+      final result = evaluatePassword('bonsoirtoi');
       expect(result.isWeak, isFalse);
       expect(result.isSolid, isFalse);
+    });
+
+    test('un mot de passe trop courant est faible malgré sa longueur', () {
+      // Assez longs pour marquer des points au barème, mais devinés d’emblée.
+      for (final value in ['password123', 'motdepasse', '12345678', 'aaaaaaaa', 'azertyuiop']) {
+        expect(evaluatePassword(value).isWeak, isTrue, reason: value);
+      }
+    });
+
+    test('un mot de passe honnête n’est pas signalé à tort', () {
+      for (final value in ['bonsoirtoi', 'Marseille84', 'K7!vQ2xr#Lm9pZ', 'Chat-Bleu-2031']) {
+        expect(evaluatePassword(value).isWeak, isFalse, reason: value);
+      }
     });
   });
 

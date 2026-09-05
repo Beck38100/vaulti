@@ -90,7 +90,11 @@ Future<String?> askNewPassphrase(BuildContext context) {
         );
       },
     ),
-  );
+  ).whenComplete(() {
+    // Libère les champs : ils portent le mot de passe de sauvegarde.
+    firstCtrl.dispose();
+    secondCtrl.dispose();
+  });
 }
 
 /// Demande le mot de passe de sauvegarde pour ouvrir une sauvegarde existante.
@@ -142,7 +146,10 @@ Future<String?> askPassphrase(BuildContext context, {required String message, St
         );
       },
     ),
-  );
+  ).whenComplete(() {
+    // Libère le champ : il porte le mot de passe de sauvegarde.
+    controller.dispose();
+  });
 }
 
 /// Que faire d'une sauvegarde importée quand le coffre n'est pas vide.

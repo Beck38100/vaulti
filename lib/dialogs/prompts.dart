@@ -67,7 +67,9 @@ Future<String?> askUserName(
         );
       },
     ),
-  );
+  ).whenComplete(() {
+    controller.dispose();
+  });
 }
 
 /// Confirmation avant une suppression.

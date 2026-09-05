@@ -141,7 +141,9 @@ Future<String?> askFolderName(BuildContext context, {String? initialValue}) {
         );
       },
     ),
-  );
+  ).whenComplete(() {
+    controller.dispose();
+  });
 }
 
 class _SheetOption extends StatelessWidget {

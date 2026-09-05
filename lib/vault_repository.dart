@@ -85,11 +85,6 @@ class VaultRepository {
     await _storage.write(key: _backupKeyKey, value: base64Encode(key));
     await _storage.write(key: _backupSaltKey, value: base64Encode(salt));
   }
-
-  Future<void> clearBackupKey() async {
-    await _storage.delete(key: _backupKeyKey);
-    await _storage.delete(key: _backupSaltKey);
-  }
 }
 
 /// Délais proposés pour le verrouillage automatique.

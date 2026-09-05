@@ -48,13 +48,6 @@ class BackupService {
     return content.isEmpty ? null : content;
   }
 
-  Future<bool> exists() async => (await _backupFile()).exists();
-
-  Future<void> delete() async {
-    final file = await _backupFile();
-    if (await file.exists()) await file.delete();
-  }
-
   /// Déchiffre une enveloppe avec une phrase secrète.
   ///
   /// Renvoie le coffre restauré et la clé dérivée, que l'appelant conserve
