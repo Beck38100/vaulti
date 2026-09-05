@@ -1,6 +1,6 @@
 # Politique de confidentialité — Vaulti
 
-**Dernière mise à jour : 5 septembre 2026**
+**Dernière mise à jour : 6 septembre 2026**
 
 Vaulti est un gestionnaire de mots de passe qui fonctionne entièrement sur votre
 téléphone. Cette politique explique quelles données l'application manipule, où
@@ -88,10 +88,16 @@ kit de développement tiers de mesure d'audience, de publicité ou de suivi.
 ## 7. Presse-papiers
 
 Lorsque vous copiez un mot de passe, il est placé dans le presse-papiers
-d'Android pour que vous puissiez le coller ailleurs. Vaulti l'efface
-automatiquement au bout de 45 secondes. Selon la version d'Android, d'autres
-applications peuvent techniquement lire le presse-papiers pendant ce court
-intervalle : c'est un comportement du système, indépendant de Vaulti.
+d'Android pour que vous puissiez le coller ailleurs. Vaulti le marque comme
+contenu sensible : à partir d'Android 13, le système masque son aperçu à l'écran
+et les claviers ne le gardent pas dans leur historique.
+
+Vaulti l'efface automatiquement au bout de 45 secondes, et uniquement si le
+presse-papiers contient encore sa propre copie : ce que vous auriez copié
+entre-temps n'est jamais effacé, et l'application ne relit pas le contenu placé
+là par d'autres. Selon la version d'Android, d'autres applications peuvent
+techniquement lire le presse-papiers pendant ce court intervalle : c'est un
+comportement du système, indépendant de Vaulti.
 
 ## 8. Suppression de vos données
 
