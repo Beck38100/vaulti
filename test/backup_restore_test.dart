@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:password_app/backup_crypto.dart';
-import 'package:password_app/models.dart';
+import 'package:vaulti/backup_crypto.dart';
+import 'package:vaulti/models.dart';
 
 /// Reproduit le scénario complet « je perds mon téléphone » :
 /// un coffre est sauvegardé, chiffré, puis relu sur un appareil neuf où seule

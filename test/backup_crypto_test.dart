@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:password_app/backup_crypto.dart';
+import 'package:vaulti/backup_crypto.dart';
 
 /// Chiffre un contenu et renvoie l'enveloppe, comme le fait l'application.
 Future<String> seal(BackupCrypto crypto, String clear, String passphrase) async {

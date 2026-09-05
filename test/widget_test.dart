@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:password_app/models.dart';
-import 'package:password_app/theme.dart';
-import 'package:password_app/vault_stats.dart';
-import 'package:password_app/widgets/common.dart';
-import 'package:password_app/widgets/dashboard.dart';
-import 'package:password_app/widgets/vault_items.dart';
+import 'package:vaulti/models.dart';
+import 'package:vaulti/theme.dart';
+import 'package:vaulti/vault_stats.dart';
+import 'package:vaulti/widgets/common.dart';
+import 'package:vaulti/widgets/dashboard.dart';
+import 'package:vaulti/widgets/vault_items.dart';
 
 Widget wrap(Widget child) => MaterialApp(
       theme: buildAppTheme(),

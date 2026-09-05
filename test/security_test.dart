@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:password_app/vault_repository.dart';
+import 'package:vaulti/vault_repository.dart';
 
 void main() {
   group('AutoLockDelay', () {

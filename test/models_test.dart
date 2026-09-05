@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:password_app/models.dart';
+import 'package:vaulti/models.dart';
 
 void main() {
   group('VaultData', () {
