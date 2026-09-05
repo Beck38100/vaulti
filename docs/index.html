@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Applications</title>
+<style>
+  :root { --bg: #0B0F14; --card: #11151C; --border: #232B36;
+          --text: #F0EEE8; --muted: #C8C7C5; --accent: #9A82FF; }
+  body {
+    margin: 0; padding: 0 20px 60px;
+    background: var(--bg); color: var(--text);
+    font: 16px/1.65 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 620px; margin: 0 auto; }
+  h1 { padding-top: 64px; margin: 0 0 6px; font-size: 27px; letter-spacing: -.4px; }
+  .lede { color: var(--muted); margin: 0 0 32px; }
+  a.app {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 18px 20px; margin-bottom: 12px;
+  }
+  a.app:hover { border-color: var(--accent); }
+  a.app strong { display: block; font-size: 17px; margin-bottom: 4px; }
+  a.app span { color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Applications</h1>
+  <p class="lede">Politiques de confidentialité et informations légales.</p>
+
+  <a class="app" href="vaulti/">
+    <strong>Vaulti</strong>
+    <span>Gestionnaire de mots de passe hors ligne — politique de confidentialité</span>
+  </a>
+</main>
+</body>
+</html>

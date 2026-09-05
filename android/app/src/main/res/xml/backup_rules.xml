@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Sauvegarde automatique Android (Android 11 et antérieurs).
+
+  Seul le fichier de sauvegarde chiffré est emporté : il est protégé par le mot
+  de passe de sauvegarde de l'utilisateur, donc inutilisable pour qui
+  l'intercepterait.
+
+  Dès qu'un <include> est présent, tout le reste est exclu d'office : le coffre
+  technique (stockage sécurisé, dans les préférences partagées) ne part donc
+  jamais. C'est voulu — il est chiffré par une clé du magasin de clés du
+  téléphone, qui n'est jamais sauvegardée : le restaurer ailleurs ne donnerait
+  que des données illisibles.
+
+  Le chemin vient de getApplicationDocumentsDirectory(), qui vaut app_flutter/
+  sur Android (Context.getDir("flutter")) : c'est un enfant du domaine "root",
+  et non du domaine "file" qui désigne getFilesDir().
+-->
+<full-backup-content>
+    <include domain="root" path="app_flutter/vaulti-sauvegarde.vaulti"/>
+</full-backup-content>

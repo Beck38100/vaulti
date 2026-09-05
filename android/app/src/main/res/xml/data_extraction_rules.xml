@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Sauvegarde cloud et transfert d'appareil à appareil (Android 12 et suivants).
+  Même principe que backup_rules.xml : uniquement le fichier chiffré, jamais le
+  coffre technique. Voir ce fichier pour le détail du chemin app_flutter/.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="root" path="app_flutter/vaulti-sauvegarde.vaulti"/>
+    </cloud-backup>
+    <device-transfer>
+        <include domain="root" path="app_flutter/vaulti-sauvegarde.vaulti"/>
+    </device-transfer>
+</data-extraction-rules>
