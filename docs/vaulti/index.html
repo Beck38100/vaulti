@@ -28,6 +28,7 @@
   .summary strong { color: var(--text); }
   h2 { margin: 40px 0 12px; font-size: 19px; letter-spacing: -.2px; color: var(--accent); }
   p, li { color: var(--muted); }
+  a { color: var(--accent); }
   li { margin-bottom: 8px; }
   strong { color: var(--text); }
   code {
@@ -53,8 +54,8 @@ sont stockées, et qui peut y accéder.</p>
 
 <div class="summary">
   <strong>En résumé : Vaulti ne collecte aucune donnée personnelle, ne contient
-  aucune publicité, aucun outil de mesure d'audience, et ne communique avec aucun
-  serveur.</strong>
+  aucune publicité, aucun outil de mesure d'audience. Le seul échange réseau de
+  l'application sert à traiter l'achat Premium optionnel, via Google Play.</strong>
 </div>
 
 <h2>1. Qui est responsable de l'application</h2>
@@ -77,8 +78,9 @@ aucun compte utilisateur. Il n'y a pas d'inscription.</p>
 sécurisé d'Android. Elles y sont chiffrées par une clé détenue par le magasin de clés
 du système (Android Keystore), qui ne quitte jamais le téléphone, et ne sont
 accessibles qu'à Vaulti.</p>
-<p><strong>Vaulti n'envoie aucune donnée sur Internet.</strong> L'application ne
-demande pas la permission d'accès au réseau : elle en est techniquement incapable.</p>
+<p><strong>Vaulti n'envoie aucune donnée personnelle sur Internet.</strong> Le seul
+accès réseau de l'application sert à traiter l'achat Premium optionnel via Google
+Play Facturation (voir section 7) — aucune autre fonction n'y a recours.</p>
 
 <h2>4. La sauvegarde chiffrée</h2>
 <p>Vaulti propose une sauvegarde destinée à retrouver votre coffre si vous perdez ou
@@ -119,7 +121,21 @@ réponse « authentification réussie » ou « échouée ».</p>
 aucune fin publicitaire ou statistique. L'application n'intègre aucun kit de
 développement tiers de mesure d'audience, de publicité ou de suivi.</p>
 
-<h2>7. Presse-papiers</h2>
+<h2>7. Achat intégré (Vaulti Premium)</h2>
+<p>Vaulti propose un achat unique, optionnel, pour lever les limites de la version
+gratuite (nombre de dossiers, mots de passe et notes). Cet achat est entièrement géré
+par <strong>Google Play Facturation</strong> (Google Play Billing) : Vaulti n'a accès
+à aucune information de paiement (numéro de carte, coordonnées bancaires...), ne les
+stocke pas et ne peut pas y accéder.</p>
+<p>Google traite ces données selon sa propre politique de confidentialité :
+<a href="https://policies.google.com/privacy">policies.google.com/privacy</a></p>
+<p>Vaulti conserve uniquement, sur votre appareil, une information technique indiquant
+si l'achat a été effectué (« Premium » ou non) — aucune autre donnée n'est associée à
+cet achat côté application.</p>
+<p>Cette fonctionnalité nécessite un accès réseau, uniquement au moment de l'achat ou
+de sa vérification.</p>
+
+<h2>8. Presse-papiers</h2>
 <p>Lorsque vous copiez un mot de passe, il est placé dans le presse-papiers d'Android pour
 que vous puissiez le coller ailleurs. Vaulti le marque comme contenu sensible : à partir
 d'Android 13, le système masque son aperçu à l'écran et les claviers ne le gardent pas
@@ -132,7 +148,7 @@ Selon la version d'Android, d'autres applications peuvent techniquement lire
 le presse-papiers pendant ce court intervalle : c'est un comportement du système,
 indépendant de Vaulti.</p>
 
-<h2>8. Suppression de vos données</h2>
+<h2>9. Suppression de vos données</h2>
 <ul>
   <li><strong>Une entrée</strong> : supprimez-la depuis l'application.</li>
   <li><strong>Tout le coffre</strong> : désinstallez Vaulti, ou effacez les données de
@@ -143,22 +159,22 @@ indépendant de Vaulti.</p>
 <p>Aucune donnée n'étant détenue par le développeur, il n'y a pas de demande de
 suppression à lui adresser.</p>
 
-<h2>9. Enfants</h2>
+<h2>10. Enfants</h2>
 <p>Vaulti ne s'adresse pas spécifiquement aux enfants et ne collecte volontairement aucune
 donnée les concernant.</p>
 
-<h2>10. Vos droits (RGPD)</h2>
+<h2>11. Vos droits (RGPD)</h2>
 <p>Le développeur de Vaulti ne collecte, ne détient et ne traite aucune donnée personnelle
 vous concernant. Vous restez seul détenteur de vos données, sur votre appareil : vous
 pouvez y accéder, les modifier, les exporter et les supprimer directement depuis
 l'application, à tout moment et sans intermédiaire.</p>
 
-<h2>11. Modifications de cette politique</h2>
+<h2>12. Modifications de cette politique</h2>
 <p>Toute évolution de cette politique sera publiée sur cette page, avec une nouvelle date
 de mise à jour. Si un changement affectait la façon dont vos données sont traitées, il
 serait également annoncé dans les notes de version de l'application.</p>
 
-<h2>12. Contact</h2>
+<h2>13. Contact</h2>
 <p>Pour toute question relative à cette politique :
 <code>qualf404@gmail.com</code></p>
 

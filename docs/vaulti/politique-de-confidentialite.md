@@ -7,7 +7,8 @@ téléphone. Cette politique explique quelles données l'application manipule, o
 elles sont stockées, et qui peut y accéder.
 
 En résumé : **Vaulti ne collecte aucune donnée personnelle, ne contient aucune
-publicité, aucun outil de mesure d'audience, et ne communique avec aucun serveur.**
+publicité, aucun outil de mesure d'audience. Le seul échange réseau de
+l'application sert à traiter l'achat Premium optionnel, via Google Play.**
 
 ---
 
@@ -36,8 +37,9 @@ d'Android. Elles y sont chiffrées par une clé détenue par le magasin de clés
 système (Android Keystore), qui ne quitte jamais le téléphone, et ne sont
 accessibles qu'à Vaulti.
 
-**Vaulti n'envoie aucune donnée sur Internet.** L'application ne demande pas la
-permission d'accès au réseau : elle en est techniquement incapable.
+**Vaulti n'envoie aucune donnée personnelle sur Internet.** Le seul accès
+réseau de l'application sert à traiter l'achat Premium optionnel via Google
+Play Facturation (voir section 7) — aucune autre fonction n'y a recours.
 
 ## 4. La sauvegarde chiffrée
 
@@ -85,7 +87,25 @@ Aucun. Vaulti ne transmet vos données à aucun tiers, ne les vend pas, ne les
 utilise à aucune fin publicitaire ou statistique. L'application n'intègre aucun
 kit de développement tiers de mesure d'audience, de publicité ou de suivi.
 
-## 7. Presse-papiers
+## 7. Achat intégré (Vaulti Premium)
+
+Vaulti propose un achat unique, optionnel, pour lever les limites de la version
+gratuite (nombre de dossiers, mots de passe et notes). Cet achat est entièrement
+géré par **Google Play Facturation** (Google Play Billing) : Vaulti n'a accès à
+aucune information de paiement (numéro de carte, coordonnées bancaires...), ne
+les stocke pas et ne peut pas y accéder.
+
+Google traite ces données selon sa propre politique de confidentialité :
+https://policies.google.com/privacy
+
+Vaulti conserve uniquement, sur votre appareil, une information technique
+indiquant si l'achat a été effectué (« Premium » ou non) — aucune autre donnée
+n'est associée à cet achat côté application.
+
+Cette fonctionnalité nécessite un accès réseau, uniquement au moment de l'achat
+ou de sa vérification.
+
+## 8. Presse-papiers
 
 Lorsque vous copiez un mot de passe, il est placé dans le presse-papiers
 d'Android pour que vous puissiez le coller ailleurs. Vaulti le marque comme
@@ -99,7 +119,7 @@ là par d'autres. Selon la version d'Android, d'autres applications peuvent
 techniquement lire le presse-papiers pendant ce court intervalle : c'est un
 comportement du système, indépendant de Vaulti.
 
-## 8. Suppression de vos données
+## 9. Suppression de vos données
 
 - **Une entrée** : supprimez-la depuis l'application.
 - **Tout le coffre** : désinstallez Vaulti, ou effacez les données de
@@ -110,26 +130,26 @@ comportement du système, indépendant de Vaulti.
 Aucune donnée n'étant détenue par le développeur, il n'y a pas de demande de
 suppression à lui adresser.
 
-## 9. Enfants
+## 10. Enfants
 
 Vaulti ne s'adresse pas spécifiquement aux enfants et ne collecte
 volontairement aucune donnée les concernant.
 
-## 10. Vos droits (RGPD)
+## 11. Vos droits (RGPD)
 
 Le développeur de Vaulti ne collecte, ne détient et ne traite aucune donnée
 personnelle vous concernant. Vous restez seul détenteur de vos données, sur
 votre appareil : vous pouvez y accéder, les modifier, les exporter et les
 supprimer directement depuis l'application, à tout moment et sans intermédiaire.
 
-## 11. Modifications de cette politique
+## 12. Modifications de cette politique
 
 Toute évolution de cette politique sera publiée sur cette page, avec une
 nouvelle date de mise à jour. Si un changement affectait la façon dont vos
 données sont traitées, il serait également annoncé dans les notes de version de
 l'application.
 
-## 12. Contact
+## 13. Contact
 
 Pour toute question relative à cette politique :
 `qualf404@gmail.com`
