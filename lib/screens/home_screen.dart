@@ -11,6 +11,7 @@ import '../backup_crypto.dart';
 import '../backup_service.dart';
 import '../dialogs.dart';
 import '../models.dart';
+import '../premium.dart';
 import '../screen_security.dart';
 import '../secure_clipboard.dart';
 import '../theme.dart';
@@ -47,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final Set<String> _revealedIds = {};
 
   String? _userName;
+  bool _isPremium = false;
   int _selectedTab = 0;
   String? _currentFolderId;
 
@@ -85,6 +87,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _loadUserName();
     _loadSecuritySettings();
+    _loadPremiumStatus();
     _openVault();
   }
 
@@ -329,10 +332,35 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       setState(() => _userName = name);
       return;
     }
-    // Premier lancement : on demande le prénom une fois la première image affichée.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Premier lancement : la version gratuite se présente juste après le
+    // déverrouillage, avant de demander le prénom.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await showFreeTierIntro(context);
       if (mounted) _askUserName(firstLaunch: true);
     });
+  }
+
+  Future<void> _loadPremiumStatus() async {
+    final isPremium = await _repository.readIsPremium();
+    if (!mounted) return;
+    setState(() => _isPremium = isPremium);
+  }
+
+  Future<void> _setPremiumForTesting(bool isPremium) async {
+    setState(() => _isPremium = isPremium);
+    await _repository.saveIsPremium(isPremium);
+    if (!mounted) return;
+    _showMessage(isPremium ? 'Premium activé (test) : plus aucune limite.' : 'Premium désactivé (test).');
+  }
+
+  /// Bloque la création avec un paywall si la limite gratuite est atteinte.
+  /// Retourne `true` si la création peut se poursuivre.
+  Future<bool> _checkPremiumLimit({required bool limitReached, required String limitLabel}) async {
+    if (_isPremium || !limitReached) return true;
+    final wantsPremium = await showPaywallDialog(context, limitLabel: limitLabel);
+    if (wantsPremium && mounted) setState(() => _selectedTab = 5);
+    return false;
   }
 
   Future<void> _askUserName({bool firstLaunch = false}) async {
@@ -439,6 +467,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Future<void> _createEntry(AddChoice choice) async {
     final isNote = choice == AddChoice.note;
+    final usage = PremiumUsage.from(_folders, _entries);
+    final allowed = await _checkPremiumLimit(
+      limitReached: isNote ? usage.noteLimitReached : usage.passwordLimitReached,
+      limitLabel: isNote ? '${PremiumLimits.maxNotes} notes' : '${PremiumLimits.maxPasswords} mots de passe',
+    );
+    if (!allowed || !mounted) return;
+
     // Le dossier ouvert sert de proposition, mais reste modifiable dans le
     // formulaire : on peut ranger une fiche n'importe où sans la déplacer après.
     final startFolder = _currentFolderId ?? '';
@@ -535,6 +570,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // --- Dossiers -----------------------------------------------------------
 
   Future<void> _createFolder() async {
+    final usage = PremiumUsage.from(_folders, _entries);
+    final allowed = await _checkPremiumLimit(
+      limitReached: usage.folderLimitReached,
+      limitLabel: '${PremiumLimits.maxFolders} dossiers',
+    );
+    if (!allowed || !mounted) return;
+
     final title = await askFolderName(context);
     if (title == null || !mounted) return;
 
@@ -687,6 +729,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       onConfigureBackup: _configureBackupPassphrase,
       onExportBackup: _exportBackup,
       onImportBackup: _importBackup,
+      isPremium: _isPremium,
+      onTogglePremiumForTesting: _setPremiumForTesting,
     );
   }
 

@@ -17,6 +17,7 @@ class VaultRepository {
   static const _screenProtectionKey = 'screen_protection';
   static const _backupKeyKey = 'backup_key';
   static const _backupSaltKey = 'backup_salt';
+  static const _isPremiumKey = 'is_premium';
 
   Future<VaultData> loadVault() async {
     final raw = await _storage.read(key: _vaultKey) ?? await _storage.read(key: _legacyVaultKey);
@@ -84,6 +85,17 @@ class VaultRepository {
   Future<void> saveBackupKey(List<int> key, List<int> salt) async {
     await _storage.write(key: _backupKeyKey, value: base64Encode(key));
     await _storage.write(key: _backupSaltKey, value: base64Encode(salt));
+  }
+
+  /// Statut Premium (achat unique). Sans vérification serveur : comme la
+  /// plupart des petites applications indépendantes, la validation reste
+  /// côté appareil.
+  Future<bool> readIsPremium() async {
+    return (await _storage.read(key: _isPremiumKey)) == 'on';
+  }
+
+  Future<void> saveIsPremium(bool isPremium) {
+    return _storage.write(key: _isPremiumKey, value: isPremium ? 'on' : 'off');
   }
 }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../premium.dart';
 import '../../theme.dart';
 import '../../vault_repository.dart';
 import '../../widgets/common.dart';
@@ -105,7 +106,93 @@ class SettingsTab extends StatelessWidget {
           subtitle: const Text('Restaurer un coffre depuis un fichier'),
           onTap: session.onImportBackup,
         ),
+        const Divider(height: 32, color: AppColors.border),
+        _PremiumSection(session: session),
       ],
     );
+  }
+}
+
+/// Statut Premium et suivi de la version gratuite.
+class _PremiumSection extends StatelessWidget {
+  const _PremiumSection({required this.session});
+
+  final VaultSession session;
+
+  @override
+  Widget build(BuildContext context) {
+    if (session.isPremium) {
+      return ListTile(
+        leading: const Icon(Icons.workspace_premium_outlined, color: AppColors.signature),
+        title: const Text('Premium actif'),
+        subtitle: const Text('Aucune limite de dossiers, mots de passe ou notes'),
+      );
+    }
+
+    final usage = session.premiumUsage;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const ListTile(
+        leading: Icon(Icons.workspace_premium_outlined, color: AppColors.signature),
+        title: Text('Version gratuite'),
+        subtitle: Text('Achat unique pour lever ces limites, sans abonnement'),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(children: [
+          _UsageRow(label: 'Dossiers', color: AppColors.folder, used: usage.folderCount, max: PremiumLimits.maxFolders),
+          const SizedBox(height: 12),
+          _UsageRow(label: 'Mots de passe', color: AppColors.password, used: usage.passwordCount, max: PremiumLimits.maxPasswords),
+          const SizedBox(height: 12),
+          _UsageRow(label: 'Notes', color: AppColors.note, used: usage.noteCount, max: PremiumLimits.maxNotes),
+        ]),
+      ),
+      const SizedBox(height: 16),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: FilledButton(
+          // Simule l'achat en attendant le branchement d'in_app_purchase, une
+          // fois les produits créés dans la Play Console.
+          onPressed: () => session.onTogglePremiumForTesting(true),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.signature,
+            foregroundColor: Colors.white,
+            minimumSize: const Size.fromHeight(46),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+          child: const Text('Passer à Premium (test)'),
+        ),
+      ),
+    ]);
+  }
+}
+
+class _UsageRow extends StatelessWidget {
+  const _UsageRow({required this.label, required this.color, required this.used, required this.max});
+
+  final String label;
+  final Color color;
+  final int used;
+  final int max;
+
+  @override
+  Widget build(BuildContext context) {
+    final ratio = max == 0 ? 0.0 : (used / max).clamp(0.0, 1.0);
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [
+        Text(label, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
+        const Spacer(),
+        Text('$used / $max', style: TextStyle(color: Colors.grey.shade500, fontSize: 12.5)),
+      ]),
+      const SizedBox(height: 6),
+      ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: LinearProgressIndicator(
+          value: ratio,
+          minHeight: 5,
+          backgroundColor: AppColors.track,
+          valueColor: AlwaysStoppedAnimation(color),
+        ),
+      ),
+    ]);
   }
 }

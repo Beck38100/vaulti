@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models.dart';
+import '../premium.dart';
 import '../vault_repository.dart';
 import '../vault_stats.dart';
 import '../widgets/vault_items.dart';
@@ -37,6 +38,8 @@ class VaultSession {
     required this.onConfigureBackup,
     required this.onExportBackup,
     required this.onImportBackup,
+    required this.isPremium,
+    required this.onTogglePremiumForTesting,
   });
 
   final List<VaultFolder> folders;
@@ -75,6 +78,15 @@ class VaultSession {
   final VoidCallback onConfigureBackup;
   final VoidCallback onExportBackup;
   final VoidCallback onImportBackup;
+
+  /// Débloqué par achat unique. Sans magasin branché pour l'instant, ce
+  /// statut se simule depuis les Réglages en attendant l'intégration
+  /// d'in_app_purchase.
+  final bool isPremium;
+  final ValueChanged<bool> onTogglePremiumForTesting;
+
+  /// Usage courant face aux limites de la version gratuite.
+  PremiumUsage get premiumUsage => PremiumUsage.from(folders, entries);
 
   /// Toutes les fiches de type mot de passe.
   List<VaultEntry> get passwords => entries.where((e) => !e.isNote).toList();
