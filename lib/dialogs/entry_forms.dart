@@ -226,11 +226,15 @@ Future<EntryDraft?> showNoteForm(
 }
 
 /// Choix d'un dossier de destination. Renvoie une chaîne vide pour la racine.
+///
+/// [title] s'adapte au contexte : « Déplacer vers... » pour une fiche déjà
+/// rangée, « Choisir un dossier » à la création, où rien n'est encore déplacé.
 Future<String?> pickFolder(
   BuildContext context, {
   required List<VaultFolder> folders,
   required String Function(String id) pathOf,
   Set<String> excludedIds = const {},
+  String title = 'Déplacer vers...',
 }) {
   final choices = folders.where((folder) => !excludedIds.contains(folder.id)).toList();
   return showDialog<String>(
@@ -238,7 +242,7 @@ Future<String?> pickFolder(
     builder: (ctx) => SimpleDialog(
       backgroundColor: AppColors.shell,
       shape: dialogShape,
-      title: const Text('Déplacer vers...'),
+      title: Text(title),
       children: [
         SimpleDialogOption(
           onPressed: () => Navigator.pop(ctx, ''),

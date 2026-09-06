@@ -8,13 +8,23 @@ import 'animations.dart';
 /// Volontairement épurée : le détail des fiches à corriger est présenté par le
 /// bandeau d'alerte juste en dessous, il n'est pas répété ici.
 class ScoreCard extends StatelessWidget {
-  const ScoreCard({super.key, required this.score, this.toFixCount = 0, this.onShowIssues});
+  const ScoreCard({
+    super.key,
+    required this.score,
+    this.toFixCount = 0,
+    this.onShowIssues,
+    this.hasPasswords = true,
+  });
 
   final int score;
 
   /// Nombre de fiches faibles ou réutilisées ; 0 masque la partie alerte.
   final int toFixCount;
   final VoidCallback? onShowIssues;
+
+  /// Faux tant qu'aucun mot de passe n'existe : afficher 0/100 donnerait
+  /// l'impression d'un coffre mal protégé plutôt que simplement vide.
+  final bool hasPasswords;
 
   void _explain(BuildContext context) {
     showDialog<void>(
@@ -60,30 +70,46 @@ class ScoreCard extends StatelessWidget {
             SizedBox(
               width: 52,
               height: 52,
-              child: TweenAnimationBuilder<double>(
-                duration: Motion.draw,
-                curve: Motion.curve,
-                // begin à zéro : l'anneau se trace au premier affichage, puis
-                // les mises à jour repartent de la valeur courante.
-                tween: Tween(begin: 0, end: score / 100),
-                builder: (context, value, _) => CircularProgressIndicator(
-                  value: value,
-                  strokeWidth: 6,
-                  backgroundColor: AppColors.track,
-                  valueColor: const AlwaysStoppedAnimation(AppColors.password),
-                ),
-              ),
+              child: hasPasswords
+                  ? TweenAnimationBuilder<double>(
+                      duration: Motion.draw,
+                      curve: Motion.curve,
+                      // begin à zéro : l'anneau se trace au premier affichage, puis
+                      // les mises à jour repartent de la valeur courante.
+                      tween: Tween(begin: 0, end: score / 100),
+                      builder: (context, value, _) => CircularProgressIndicator(
+                        value: value,
+                        strokeWidth: 6,
+                        backgroundColor: AppColors.track,
+                        valueColor: const AlwaysStoppedAnimation(AppColors.password),
+                      ),
+                    )
+                  : DecoratedBox(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.track, width: 6),
+                      ),
+                    ),
             ),
             const SizedBox(width: 16),
-            Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-              Row(crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, children: [
-                Text('$score', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Colors.white)),
-                Text('/100', style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                if (hasPasswords)
+                  Row(crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, children: [
+                    Text('$score', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Colors.white)),
+                    Text('/100', style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
+                  ])
+                else
+                  const Text('—', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Colors.white)),
+                const SizedBox(height: 2),
+                Text(
+                  hasPasswords ? 'Score de sécurité' : 'Ajoute un mot de passe pour voir ton score',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                ),
               ]),
-              const SizedBox(height: 2),
-              Text('Score de sécurité', style: TextStyle(color: Colors.grey.shade400, fontSize: 13)),
-            ]),
-            const Spacer(),
+            ),
             // Discret : le score n'est pas cliquable, seule cette bulle l'est.
             IconButton(
               tooltip: 'À quoi correspond ce score ?',

@@ -60,6 +60,7 @@ class _PasswordsTabState extends State<PasswordsTab> {
               entry: entry,
               revealed: session.isRevealed(entry),
               actions: session.entryActions(entry),
+              folderLabel: session.folderPath(entry.folderId),
             )),
       ],
     );

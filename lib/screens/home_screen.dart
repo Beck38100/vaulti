@@ -482,13 +482,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             context,
             initialFolderId: startFolder,
             folderPathOf: _sessionFolderPath,
-            chooseFolder: _pickDestination,
+            chooseFolder: _pickDestinationForCreation,
           )
         : await showPasswordForm(
             context,
             initialFolderId: startFolder,
             folderPathOf: _sessionFolderPath,
-            chooseFolder: _pickDestination,
+            chooseFolder: _pickDestinationForCreation,
           );
     if (draft == null || !mounted) return;
 
@@ -644,14 +644,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return found..remove(folderId);
   }
 
-  Future<String?> _pickDestination({Set<String> excludedIds = const {}}) {
+  Future<String?> _pickDestination({Set<String> excludedIds = const {}, String? title}) {
     return pickFolder(
       context,
       folders: _folders,
       excludedIds: excludedIds,
       pathOf: _sessionFolderPath,
+      title: title ?? 'Déplacer vers...',
     );
   }
+
+  /// Choix du dossier lors de la création : rien n'est encore rangé, donc pas
+  /// question de « déplacer ».
+  Future<String?> _pickDestinationForCreation() => _pickDestination(title: 'Choisir un dossier');
 
   String _sessionFolderPath(String? folderId) => _buildSession().folderPath(folderId);
 

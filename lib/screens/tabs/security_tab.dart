@@ -26,7 +26,7 @@ class SecurityTab extends StatelessWidget {
           color: AppColors.securityTitle,
         ),
         const SizedBox(height: 20),
-        ScoreCard(score: stats.score),
+        ScoreCard(score: stats.score, hasPasswords: session.passwords.isNotEmpty),
         if (stats.flagged.isNotEmpty) ...[
           const SizedBox(height: 20),
           const WeakPasswordsHeading(),

@@ -99,6 +99,7 @@ class _VaultTabState extends State<VaultTab> {
           score: session.stats.score,
           toFixCount: session.stats.flagged.length,
           onShowIssues: () => session.onGoToTab(4),
+          hasPasswords: session.passwords.isNotEmpty,
         ),
         const SizedBox(height: 14),
         TextField(

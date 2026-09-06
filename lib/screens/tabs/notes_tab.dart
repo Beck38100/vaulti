@@ -60,6 +60,7 @@ class _NotesTabState extends State<NotesTab> {
               entry: entry,
               revealed: session.isRevealed(entry),
               actions: session.entryActions(entry),
+              folderLabel: session.folderPath(entry.folderId),
             )),
       ],
     );

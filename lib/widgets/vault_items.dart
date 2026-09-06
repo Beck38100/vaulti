@@ -124,11 +124,17 @@ class EntryRow extends StatelessWidget {
     required this.entry,
     required this.revealed,
     required this.actions,
+    this.folderLabel,
   });
 
   final VaultEntry entry;
   final bool revealed;
   final ItemActions actions;
+
+  /// Chemin du dossier de la fiche, ajouté au sous-titre dans les vues qui
+  /// mélangent plusieurs dossiers (onglets Mots de passe et Notes) — sans lui,
+  /// rien n'indique où se trouve chaque fiche.
+  final String? folderLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +153,7 @@ class EntryRow extends StatelessWidget {
         icon: entryIcon(entry),
         iconColor: typeColor,
         title: entry.title.isEmpty ? 'Accès' : entry.title,
-        subtitle: revealed ? entry.revealedContent : hidden,
+        subtitle: [revealed ? entry.revealedContent : hidden, ?folderLabel].join(' · '),
         onTap: actions.onEdit,
         trailing: Row(mainAxisSize: MainAxisSize.min, children: [
           IconButton(

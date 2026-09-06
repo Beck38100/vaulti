@@ -20,7 +20,7 @@ class FoldersTab extends StatelessWidget {
       children: [
         const SectionHeader(
           title: 'Dossiers',
-          subtitle: 'Ton arborescence de comptes et de notes',
+          subtitle: 'À la racine de ton coffre — ouvre un dossier pour voir ses sous-dossiers',
           color: AppColors.folder,
         ),
         const SizedBox(height: 20),
