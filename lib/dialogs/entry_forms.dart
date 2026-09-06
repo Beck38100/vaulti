@@ -82,7 +82,7 @@ Future<EntryDraft?> showPasswordForm(
             passwordError = passCtrl.text.isEmpty ? 'Saisis le mot de passe à conserver.' : null;
           });
           if (title.isEmpty || passCtrl.text.isEmpty) return;
-          Navigator.pop(
+          closeDialog(
             ctx,
             EntryDraft(
               title: title,
@@ -148,13 +148,7 @@ Future<EntryDraft?> showPasswordForm(
         ]),
       ),
     ),
-  ).whenComplete(() {
-    // Libère les champs : ils portent le mot de passe saisi.
-    titleCtrl.dispose();
-    userCtrl.dispose();
-    passCtrl.dispose();
-    commentCtrl.dispose();
-  });
+  ).whenComplete(() => disposeAfterFrame([titleCtrl, userCtrl, passCtrl, commentCtrl]));
 }
 
 /// Formulaire d'une note (création et modification).
@@ -186,7 +180,7 @@ Future<EntryDraft?> showNoteForm(
             setDialogState(() => noteError = 'Écris au moins un titre ou du contenu.');
             return;
           }
-          Navigator.pop(
+          closeDialog(
             ctx,
             EntryDraft(
               title: title.isEmpty ? 'Note sans titre' : title,
@@ -228,11 +222,7 @@ Future<EntryDraft?> showNoteForm(
         ]),
       ),
     ),
-  ).whenComplete(() {
-    // Le contenu de la note reste en mémoire tant que les champs vivent.
-    titleCtrl.dispose();
-    contentCtrl.dispose();
-  });
+  ).whenComplete(() => disposeAfterFrame([titleCtrl, contentCtrl]));
 }
 
 /// Choix d'un dossier de destination. Renvoie une chaîne vide pour la racine.

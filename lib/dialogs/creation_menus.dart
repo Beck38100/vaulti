@@ -114,7 +114,7 @@ Future<String?> askFolderName(BuildContext context, {String? initialValue}) {
             setDialogState(() => error = 'Donne un nom à ce dossier.');
             return;
           }
-          Navigator.pop(ctx, title);
+          closeDialog(ctx, title);
         }
 
         return VaultFormDialog(
@@ -141,9 +141,7 @@ Future<String?> askFolderName(BuildContext context, {String? initialValue}) {
         );
       },
     ),
-  ).whenComplete(() {
-    controller.dispose();
-  });
+  ).whenComplete(() => disposeAfterFrame([controller]));
 }
 
 class _SheetOption extends StatelessWidget {

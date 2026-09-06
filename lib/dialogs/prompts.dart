@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import 'form_shell.dart';
 
 /// Demande le prénom de l'utilisateur.
 /// Quand [dismissible] est faux, la fenêtre ne peut pas être fermée sans réponse
@@ -24,7 +25,7 @@ Future<String?> askUserName(
             setDialogState(() => error = 'Indique ton prénom pour continuer.');
             return;
           }
-          Navigator.pop(ctx, name);
+          closeDialog(ctx, name);
         }
 
         return PopScope(
@@ -50,7 +51,7 @@ Future<String?> askUserName(
             actions: [
               if (dismissible)
                 TextButton(
-                  onPressed: () => Navigator.pop(ctx),
+                  onPressed: () => closeDialog(ctx),
                   child: Text('Annuler', style: TextStyle(color: Colors.grey.shade400)),
                 ),
               FilledButton(
@@ -67,9 +68,7 @@ Future<String?> askUserName(
         );
       },
     ),
-  ).whenComplete(() {
-    controller.dispose();
-  });
+  ).whenComplete(() => disposeAfterFrame([controller]));
 }
 
 /// Confirmation avant une suppression.

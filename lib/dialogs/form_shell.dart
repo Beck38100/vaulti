@@ -2,6 +2,28 @@ import 'package:flutter/material.dart';
 
 import '../theme.dart';
 
+/// Ferme un dialogue de formulaire.
+///
+/// Sans ce retrait de focus, fermer le clavier et le dialogue dans le même
+/// geste fait planter le framework (le champ de texte reste concentré
+/// pendant que son AlertDialog se démonte).
+void closeDialog<T>(BuildContext context, [T? result]) {
+  FocusManager.instance.primaryFocus?.unfocus();
+  Navigator.pop(context, result);
+}
+
+/// Libère des contrôleurs de texte une fois la fermeture du dialogue
+/// retombée, plutôt qu'immédiatement : les disposer pendant que son
+/// animation de sortie tient encore le champ de texte fait planter le
+/// framework.
+void disposeAfterFrame(Iterable<TextEditingController> controllers) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    for (final controller in controllers) {
+      controller.dispose();
+    }
+  });
+}
+
 /// Enveloppe commune aux fenêtres de création et de modification.
 ///
 /// Chaque fenêtre porte la couleur de son type et une icône en médaillon, pour
@@ -59,7 +81,7 @@ class VaultFormDialog extends StatelessWidget {
       content: SingleChildScrollView(child: child),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => closeDialog(context),
           child: Text('Annuler', style: TextStyle(color: Colors.grey.shade400)),
         ),
         FilledButton(
