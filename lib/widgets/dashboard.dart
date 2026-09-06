@@ -168,38 +168,3 @@ class WeakPasswordsHeading extends StatelessWidget {
     ]);
   }
 }
-
-/// Bandeau d'alerte : nombre de fiches à corriger, faibles comme réutilisées.
-class WeakPasswordBanner extends StatelessWidget {
-  const WeakPasswordBanner({super.key, required this.count, this.onTap});
-
-  final int count;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final plural = count > 1 ? 's' : '';
-    return Material(
-      color: AppColors.warningBackground,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(children: [
-            const Icon(Icons.warning_amber_rounded, color: AppColors.warning, size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                '$count mot$plural de passe à corriger',
-                style: const TextStyle(color: AppColors.warningText, fontSize: 13, fontWeight: FontWeight.w600),
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: AppColors.warningChevron, size: 18),
-          ]),
-        ),
-      ),
-    );
-  }
-}

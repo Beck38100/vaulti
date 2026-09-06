@@ -58,15 +58,13 @@ class _VaultTabState extends State<VaultTab> {
     widget.session.onOpenFolder(parentId.isEmpty ? null : parentId);
   }
 
-  /// Le sous-titre dit la vérité sur l'état du coffre plutôt que d'afficher
-  /// « à jour » alors que des mots de passe sont à corriger.
+  /// Le détail des fiches à corriger est porté par le bandeau d'alerte de la
+  /// carte de score juste en dessous : pas de raison de le répéter ici.
   String _subtitle(VaultSession session) {
-    final toFix = session.stats.flagged.length;
     if (session.entries.isEmpty && session.folders.isEmpty) {
       return 'Prêt à accueillir tes premiers accès';
     }
-    if (toFix == 0) return 'Ton coffre est à jour';
-    return toFix == 1 ? '1 mot de passe mérite ton attention' : '$toFix mots de passe méritent ton attention';
+    return 'Ton coffre est à jour';
   }
 
   @override

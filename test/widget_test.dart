@@ -21,12 +21,6 @@ void main() {
     expect(find.text('Score de sécurité'), findsOneWidget);
   });
 
-  testWidgets('le bandeau d’alerte s’accorde au pluriel', (tester) async {
-    await tester.pumpWidget(wrap(const WeakPasswordBanner(count: 2)));
-
-    expect(find.text('2 mots de passe à corriger'), findsOneWidget);
-  });
-
   testWidgets('les deux faiblesses ont chacune leur pastille', (tester) async {
     final flagged = FlaggedEntry(
       entry: VaultEntry(id: '1', type: VaultItemType.password, title: 'Netflix', password: 'azerty'),
