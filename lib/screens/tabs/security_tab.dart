@@ -32,23 +32,37 @@ class SecurityTab extends StatelessWidget {
           const WeakPasswordsHeading(),
           const SizedBox(height: 4),
         ],
-        ...stats.flagged.map((flagged) => ListTile(
-              leading: Icon(entryIcon(flagged.entry), color: AppColors.warning),
-              title: Text(flagged.entry.title.isEmpty ? 'Mot de passe' : flagged.entry.title),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Row(children: flagged.reasons.map((r) => WeaknessTag(r)).toList()),
-              ),
-              trailing: IconButton(
-                tooltip: 'Modifier',
-                onPressed: () => session.onEditEntry(flagged.entry),
-                icon: const Icon(Icons.edit_outlined),
+        ...stats.flagged.map((flagged) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Material(
+                color: AppColors.surface,
+                shape: cardShape(),
+                clipBehavior: Clip.antiAlias,
+                child: ListTile(
+                  leading: Icon(entryIcon(flagged.entry), color: AppColors.warning),
+                  title: Text(flagged.entry.title.isEmpty ? 'Mot de passe' : flagged.entry.title),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(children: flagged.reasons.map((r) => WeaknessTag(r)).toList()),
+                  ),
+                  trailing: IconButton(
+                    tooltip: 'Modifier',
+                    onPressed: () => session.onEditEntry(flagged.entry),
+                    icon: const Icon(Icons.edit_outlined),
+                  ),
+                ),
               ),
             )),
-        ListTile(
-          leading: const Icon(Icons.verified_user_outlined, color: AppColors.security),
-          title: const Text('Coffre protégé'),
-          subtitle: Text('${stats.solidCount} mot$solidPlural de passe solide$solidPlural · masqués par défaut'),
+        if (stats.flagged.isNotEmpty) const SizedBox(height: 12),
+        Material(
+          color: AppColors.surface,
+          shape: cardShape(),
+          clipBehavior: Clip.antiAlias,
+          child: ListTile(
+            leading: const Icon(Icons.verified_user_outlined, color: AppColors.security),
+            title: const Text('Coffre protégé'),
+            subtitle: Text('${stats.solidCount} mot$solidPlural de passe solide$solidPlural · masqués par défaut'),
+          ),
         ),
       ],
     );

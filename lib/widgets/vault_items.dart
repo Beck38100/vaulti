@@ -73,7 +73,7 @@ class _SwipeToDelete extends StatelessWidget {
         padding: const EdgeInsets.only(right: 22),
         decoration: BoxDecoration(
           color: AppColors.warning.withValues(alpha: 0.22),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(26),
         ),
         child: const Icon(Icons.delete_outline, color: AppColors.warning),
       ),
@@ -193,12 +193,14 @@ class FolderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final title = folder.title.isEmpty ? 'Dossier' : folder.title;
     return AppearIn(
-      child: Material(
+      child: PressScale(
+      builder: (context, onHighlightChanged) => Material(
       color: folderColor(title),
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(26),
       child: InkWell(
         onTap: onOpen,
-        borderRadius: BorderRadius.circular(18),
+        onHighlightChanged: onHighlightChanged,
+        borderRadius: BorderRadius.circular(26),
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -238,6 +240,7 @@ class FolderCard extends StatelessWidget {
                 style: const TextStyle(color: AppColors.onCardMuted, fontSize: 12)),
           ]),
         ),
+      ),
       ),
       ),
     );

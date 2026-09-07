@@ -132,16 +132,19 @@ class _AddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.addButton,
-      shape: const CircleBorder(),
-      elevation: 3,
-      child: InkWell(
-        onTap: onTap,
-        customBorder: const CircleBorder(),
-        child: const Padding(
-          padding: EdgeInsets.all(13),
-          child: Icon(Icons.add, color: Colors.white, size: 22),
+    return Container(
+      decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: glow(AppColors.addButton)),
+      child: Material(
+        color: AppColors.addButton,
+        shape: const CircleBorder(),
+        elevation: 3,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: const Padding(
+            padding: EdgeInsets.all(13),
+            child: Icon(Icons.add, color: Colors.white, size: 22),
+          ),
         ),
       ),
     );

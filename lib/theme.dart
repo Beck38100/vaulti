@@ -70,7 +70,7 @@ ThemeData buildAppTheme() {
 /// une note), ce qui rend les fenêtres de création moins austères.
 InputDecoration fieldDecoration(String hint, {Color accent = AppColors.signature}) {
   final border = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(18),
+    borderRadius: BorderRadius.circular(22),
     borderSide: const BorderSide(color: AppColors.fieldBorder),
   );
   return InputDecoration(
@@ -82,11 +82,25 @@ InputDecoration fieldDecoration(String hint, {Color accent = AppColors.signature
     border: border,
     enabledBorder: border,
     focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(22),
       borderSide: BorderSide(color: accent, width: 1.6),
     ),
   );
 }
+
+/// Forme plate à contour discret, commune aux cartes du coffre (score,
+/// fiches, dossiers) : pas de dégradé ni de flou, juste un trait fin pour
+/// détacher la carte du fond sans l'alourdir.
+ShapeBorder cardShape([double radius = 26]) => RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(radius),
+      side: const BorderSide(color: AppColors.border),
+    );
+
+/// Lueur discrète derrière un élément mis en avant (le bouton d'ajout) :
+/// la seule touche « glow » reprise de l'inspiration, sans flou généralisé.
+List<BoxShadow> glow(Color color) => [
+      BoxShadow(color: color.withValues(alpha: 0.45), blurRadius: 18, spreadRadius: 1),
+    ];
 
 /// Message bref, aux couleurs de l'application plutôt qu'au style par défaut.
 SnackBar appSnackBar(String message, {bool isWarning = false}) {
@@ -106,7 +120,7 @@ SnackBar appSnackBar(String message, {bool isWarning = false}) {
     behavior: SnackBarBehavior.floating,
     margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(20),
       side: const BorderSide(color: AppColors.border),
     ),
     duration: const Duration(seconds: 3),

@@ -12,7 +12,7 @@ Future<AddChoice?> showAddMenu(BuildContext context) {
   return showModalBottomSheet<AddChoice>(
     context: context,
     backgroundColor: AppColors.sheet,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
     sheetAnimationStyle: AnimationStyle(duration: Motion.normal, curve: Motion.spring),
     builder: (ctx) => SafeArea(
       child: Padding(
@@ -61,7 +61,7 @@ Future<AddChoice?> showFolderNextStep(BuildContext context) {
   return showModalBottomSheet<AddChoice>(
     context: context,
     backgroundColor: AppColors.sheet,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
     builder: (ctx) => SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(18),

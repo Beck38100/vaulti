@@ -31,7 +31,7 @@ class ScoreCard extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.shell,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: dialogShape,
         title: const Text('Le score de sécurité'),
         content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(
@@ -62,14 +62,15 @@ class ScoreCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.surface,
-      borderRadius: BorderRadius.circular(18),
+      shape: cardShape(),
+      clipBehavior: Clip.antiAlias,
       child: Column(children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
           child: Row(children: [
             SizedBox(
-              width: 52,
-              height: 52,
+              width: 64,
+              height: 64,
               child: hasPasswords
                   ? TweenAnimationBuilder<double>(
                       duration: Motion.draw,
@@ -79,7 +80,7 @@ class ScoreCard extends StatelessWidget {
                       tween: Tween(begin: 0, end: score / 100),
                       builder: (context, value, _) => CircularProgressIndicator(
                         value: value,
-                        strokeWidth: 6,
+                        strokeWidth: 7,
                         backgroundColor: AppColors.track,
                         valueColor: const AlwaysStoppedAnimation(AppColors.password),
                       ),
@@ -87,26 +88,26 @@ class ScoreCard extends StatelessWidget {
                   : DecoratedBox(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.track, width: 6),
+                        border: Border.all(color: AppColors.track, width: 7),
                       ),
                     ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 18),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
                 if (hasPasswords)
                   Row(crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, children: [
-                    Text('$score', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Colors.white)),
-                    Text('/100', style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
+                    Text('$score', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: Colors.white)),
+                    Text('/100', style: TextStyle(fontSize: 15, color: Colors.grey.shade500)),
                   ])
                 else
-                  const Text('—', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Colors.white)),
-                const SizedBox(height: 2),
+                  const Text('—', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: Colors.white)),
+                const SizedBox(height: 3),
                 Text(
                   hasPasswords ? 'Score de sécurité' : 'Ajoute un mot de passe pour voir ton score',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                  style: TextStyle(color: Colors.grey.shade400, fontSize: 13.5),
                 ),
               ]),
             ),
@@ -137,10 +138,10 @@ class _IssuesStrip extends StatelessWidget {
     final plural = count > 1 ? 's' : '';
     return Material(
       color: AppColors.warningBackground,
-      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(18)),
+      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(26)),
       child: InkWell(
         onTap: onTap,
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(18)),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(26)),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
           child: Row(children: [

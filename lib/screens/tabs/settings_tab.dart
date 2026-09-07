@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../premium.dart';
 import '../../theme.dart';
@@ -6,11 +7,25 @@ import '../../vault_repository.dart';
 import '../../widgets/common.dart';
 import '../vault_session.dart';
 
+/// Formulaire de retour (Google Forms, hors de l'app) : pas de compte ni de
+/// serveur côté Vaulti, juste un lien ouvert dans le navigateur.
+const _feedbackFormUrl =
+    'https://docs.google.com/forms/d/e/1FAIpQLSfiu4KGpa3-G1V_9z4MwnwxMzWbNwSZ1NOT7K8eqciV5NXgxQ/viewform';
+
 /// Réglages de l'application : profil et protection du coffre.
 class SettingsTab extends StatelessWidget {
   const SettingsTab({super.key, required this.session});
 
   final VaultSession session;
+
+  Future<void> _openFeedbackForm(BuildContext context) async {
+    final opened = await launchUrl(Uri.parse(_feedbackFormUrl), mode: LaunchMode.externalApplication);
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(appSnackBar('Impossible d’ouvrir le formulaire.', isWarning: true));
+    }
+  }
 
   Future<void> _chooseAutoLock(BuildContext context) async {
     final chosen = await showDialog<AutoLockDelay>(
@@ -51,64 +66,99 @@ class SettingsTab extends StatelessWidget {
           color: AppColors.settings,
         ),
         const SizedBox(height: 20),
-        ListTile(
-          leading: const Icon(Icons.person_outline, color: AppColors.signature),
-          title: const Text('Ton prénom'),
-          subtitle: Text(session.userName ?? 'Non renseigné'),
-          trailing: const Icon(Icons.edit_outlined, size: 20),
-          onTap: session.onRenameUser,
-        ),
-        const Divider(height: 32, color: AppColors.border),
-        const ListTile(
-          leading: Icon(Icons.fingerprint, color: AppColors.security),
-          title: Text('Empreinte ou code'),
-          subtitle: Text('Demandé à l’ouverture du coffre et avant chaque révélation'),
-        ),
-        ListTile(
-          leading: const Icon(Icons.lock_clock_outlined, color: AppColors.signature),
-          title: const Text('Verrouillage automatique'),
-          subtitle: Text(session.autoLockDelay.label),
-          trailing: const Icon(Icons.chevron_right, size: 20),
-          onTap: () => _chooseAutoLock(context),
-        ),
-        SwitchListTile(
-          value: session.screenProtection,
-          onChanged: session.onScreenProtectionChanged,
-          activeThumbColor: AppColors.signature,
-          secondary: const Icon(Icons.screenshot_outlined, color: AppColors.signature),
-          title: const Text('Bloquer les captures d’écran'),
-          subtitle: const Text('Masque aussi le coffre dans les applis récentes'),
-        ),
-        const Divider(height: 32, color: AppColors.border),
-        ListTile(
-          leading: Icon(
-            session.hasBackupPassphrase ? Icons.shield_outlined : Icons.shield_outlined,
-            color: session.hasBackupPassphrase ? AppColors.security : AppColors.warning,
+        _SettingsGroup(children: [
+          ListTile(
+            leading: const Icon(Icons.person_outline, color: AppColors.signature),
+            title: const Text('Ton prénom'),
+            subtitle: Text(session.userName ?? 'Non renseigné'),
+            trailing: const Icon(Icons.edit_outlined, size: 20),
+            onTap: session.onRenameUser,
           ),
-          title: const Text('Mot de passe de sauvegarde'),
-          subtitle: Text(
-            session.hasBackupPassphrase
-                ? 'Tes sauvegardes sont protégées'
-                : 'À définir : sans lui, aucune sauvegarde n’est possible',
+        ]),
+        const SizedBox(height: 14),
+        _SettingsGroup(children: [
+          const ListTile(
+            leading: Icon(Icons.fingerprint, color: AppColors.security),
+            title: Text('Empreinte ou code'),
+            subtitle: Text('Demandé à l’ouverture du coffre et avant chaque révélation'),
           ),
-          trailing: const Icon(Icons.chevron_right, size: 20),
-          onTap: session.onConfigureBackup,
-        ),
-        ListTile(
-          leading: const Icon(Icons.upload_file_outlined, color: AppColors.signature),
-          title: const Text('Exporter une sauvegarde'),
-          subtitle: const Text('Enregistrer une copie chiffrée où tu veux'),
-          onTap: session.onExportBackup,
-        ),
-        ListTile(
-          leading: const Icon(Icons.download_outlined, color: AppColors.signature),
-          title: const Text('Importer une sauvegarde'),
-          subtitle: const Text('Restaurer un coffre depuis un fichier'),
-          onTap: session.onImportBackup,
-        ),
-        const Divider(height: 32, color: AppColors.border),
+          ListTile(
+            leading: const Icon(Icons.lock_clock_outlined, color: AppColors.signature),
+            title: const Text('Verrouillage automatique'),
+            subtitle: Text(session.autoLockDelay.label),
+            trailing: const Icon(Icons.chevron_right, size: 20),
+            onTap: () => _chooseAutoLock(context),
+          ),
+          SwitchListTile(
+            value: session.screenProtection,
+            onChanged: session.onScreenProtectionChanged,
+            activeThumbColor: AppColors.signature,
+            secondary: const Icon(Icons.screenshot_outlined, color: AppColors.signature),
+            title: const Text('Bloquer les captures d’écran'),
+            subtitle: const Text('Masque aussi le coffre dans les applis récentes'),
+          ),
+        ]),
+        const SizedBox(height: 14),
+        _SettingsGroup(children: [
+          ListTile(
+            leading: Icon(
+              session.hasBackupPassphrase ? Icons.shield_outlined : Icons.shield_outlined,
+              color: session.hasBackupPassphrase ? AppColors.security : AppColors.warning,
+            ),
+            title: const Text('Mot de passe de sauvegarde'),
+            subtitle: Text(
+              session.hasBackupPassphrase
+                  ? 'Tes sauvegardes sont protégées'
+                  : 'À définir : sans lui, aucune sauvegarde n’est possible',
+            ),
+            trailing: const Icon(Icons.chevron_right, size: 20),
+            onTap: session.onConfigureBackup,
+          ),
+          ListTile(
+            leading: const Icon(Icons.upload_file_outlined, color: AppColors.signature),
+            title: const Text('Exporter une sauvegarde'),
+            subtitle: const Text('Enregistrer une copie chiffrée où tu veux'),
+            onTap: session.onExportBackup,
+          ),
+          ListTile(
+            leading: const Icon(Icons.download_outlined, color: AppColors.signature),
+            title: const Text('Importer une sauvegarde'),
+            subtitle: const Text('Restaurer un coffre depuis un fichier'),
+            onTap: session.onImportBackup,
+          ),
+        ]),
+        const SizedBox(height: 14),
         _PremiumSection(session: session),
+        const SizedBox(height: 14),
+        _SettingsGroup(children: [
+          ListTile(
+            leading: const Icon(Icons.chat_bubble_outline, color: AppColors.signature),
+            title: const Text('Donner mon avis'),
+            subtitle: const Text('Un formulaire rapide, deux minutes'),
+            trailing: const Icon(Icons.open_in_new, size: 18),
+            onTap: () => _openFeedbackForm(context),
+          ),
+        ]),
       ],
+    );
+  }
+}
+
+/// Un groupe de réglages apparentés, réuni dans une seule carte à bordure
+/// fine plutôt que séparé par des traits — même langage visuel que le reste
+/// de l'app.
+class _SettingsGroup extends StatelessWidget {
+  const _SettingsGroup({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surface,
+      shape: cardShape(),
+      clipBehavior: Clip.antiAlias,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children),
     );
   }
 }
@@ -122,15 +172,17 @@ class _PremiumSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (session.isPremium) {
-      return ListTile(
-        leading: const Icon(Icons.workspace_premium_outlined, color: AppColors.signature),
-        title: const Text('Premium actif'),
-        subtitle: const Text('Aucune limite de dossiers, mots de passe ou notes'),
-      );
+      return _SettingsGroup(children: [
+        ListTile(
+          leading: const Icon(Icons.workspace_premium_outlined, color: AppColors.signature),
+          title: const Text('Premium actif'),
+          subtitle: const Text('Aucune limite de dossiers, mots de passe ou notes'),
+        ),
+      ]);
     }
 
     final usage = session.premiumUsage;
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    return _SettingsGroup(children: [
       const ListTile(
         leading: Icon(Icons.workspace_premium_outlined, color: AppColors.signature),
         title: Text('Version gratuite'),
@@ -162,6 +214,7 @@ class _PremiumSection extends StatelessWidget {
           child: const Text('Passer à Premium (test)'),
         ),
       ),
+      const SizedBox(height: 18),
     ]);
   }
 }

@@ -37,7 +37,7 @@ class _FolderField extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(22),
       child: InputDecorator(
         decoration: fieldDecoration('Dossier', accent: accent).copyWith(
           suffixIcon: const Icon(Icons.unfold_more, size: 20),

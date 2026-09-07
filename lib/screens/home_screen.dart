@@ -696,13 +696,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   /// Appui sur une icône de la barre du bas.
-  /// Revenir sur « Coffre » ramène toujours à la racine, sans avoir à remonter
-  /// les dossiers un par un.
+  /// Revenir sur « Coffre » ou taper sur « Dossiers » ramène toujours à la
+  /// racine, sans avoir à remonter les dossiers un par un. Un dossier ouvert
+  /// depuis une recherche (qui passe par onGoToTab, pas par ici) reste lui
+  /// affiché tel quel.
   void _onNavTap(int index) {
     if (index == 0) _vaultSearchController.clear();
     setState(() {
       _selectedTab = index;
-      if (index == 0) _currentFolderId = null;
+      if (index == 0 || index == 3) _currentFolderId = null;
     });
   }
 

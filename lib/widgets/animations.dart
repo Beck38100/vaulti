@@ -52,6 +52,34 @@ class AppearIn extends StatelessWidget {
   }
 }
 
+/// Réduit très légèrement une carte tactile pendant l'appui.
+///
+/// Vient s'ajouter à l'ondulation habituelle de [InkWell] plutôt que la
+/// remplacer : passer [onHighlightChanged] de l'InkWell concerné comme second
+/// argument du [builder] suffit à brancher l'effet.
+class PressScale extends StatefulWidget {
+  const PressScale({super.key, required this.builder});
+
+  final Widget Function(BuildContext context, ValueChanged<bool> onHighlightChanged) builder;
+
+  @override
+  State<PressScale> createState() => _PressScaleState();
+}
+
+class _PressScaleState extends State<PressScale> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedScale(
+      scale: _pressed ? 0.97 : 1,
+      duration: Motion.quick,
+      curve: Motion.curve,
+      child: widget.builder(context, (value) => setState(() => _pressed = value)),
+    );
+  }
+}
+
 /// Fait glisser le contenu horizontalement lors d'un changement de dossier.
 ///
 /// [depth] indique le niveau dans l'arborescence : en descendant, le nouveau

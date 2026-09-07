@@ -41,6 +41,8 @@ dependencies:
   path_provider: ^2.1.5
   # Enregistrement et sélection du fichier de sauvegarde exporté.
   file_picker: ^12.2.0
+  # Ouvre le formulaire de retour dans le navigateur du téléphone.
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:
