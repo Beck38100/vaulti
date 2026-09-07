@@ -13,6 +13,12 @@ aucune permission réseau : tout reste sur le téléphone.
 - Sauvegarde chiffrée (PBKDF2-HMAC-SHA256 + AES-256-GCM) reprise par la
   sauvegarde automatique d'Android, et export/import manuel.
 
+L'onglet Coffre sert de tableau de bord (score de sécurité, accès rapide aux
+trois catégories) ; c'est l'onglet Dossiers qui permet de naviguer dans
+l'arborescence — un dossier ouvert affiche ses sous-dossiers et ses fiches,
+avec un fil d'Ariane pour remonter. Les onglets Mots de passe et Notes
+listent, eux, tout le coffre à plat, tous dossiers confondus.
+
 ## Organisation du code
 
 ```
@@ -40,7 +46,7 @@ seuls, et c'est ce que fait `test/`.
 
 ```bash
 flutter pub get
-flutter test          # 39 tests
+flutter test          # 45 tests
 flutter analyze
 flutter run
 ```
@@ -73,6 +79,15 @@ Store** : elle doit être sauvegardée hors de ce poste.
 n'incluent qu'un seul fichier : la sauvegarde chiffrée. Son chemin y est écrit
 en dur (`app_flutter/vaulti-sauvegarde.vaulti`) et doit rester synchronisé avec
 `BackupService.fileName`.
+
+## Retour utilisateur
+
+Le bouton « Donner mon avis » des Réglages (`lib/screens/tabs/settings_tab.dart`)
+ouvre un formulaire Google Forms externe dans le navigateur, via `url_launcher`.
+L'app elle-même n'envoie ni ne reçoit rien : `LaunchMode.externalApplication`
+délègue entièrement au navigateur, donc aucune permission réseau n'est
+nécessaire côté Vaulti. Le lien est en dur dans `_feedbackFormUrl` ; le
+modifier suffit à changer de formulaire.
 
 ## Politique de confidentialité
 

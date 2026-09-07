@@ -1,6 +1,6 @@
 # Politique de confidentialité — Vaulti
 
-**Dernière mise à jour : 6 septembre 2026**
+**Dernière mise à jour : 7 septembre 2026**
 
 Vaulti est un gestionnaire de mots de passe qui fonctionne entièrement sur votre
 téléphone. Cette politique explique quelles données l'application manipule, où
@@ -83,9 +83,15 @@ uniquement une réponse « authentification réussie » ou « échouée ».
 
 ## 6. Partage avec des tiers
 
-Aucun. Vaulti ne transmet vos données à aucun tiers, ne les vend pas, ne les
-utilise à aucune fin publicitaire ou statistique. L'application n'intègre aucun
-kit de développement tiers de mesure d'audience, de publicité ou de suivi.
+Vaulti ne transmet vos données à aucun tiers, ne les vend pas, ne les utilise à
+aucune fin publicitaire ou statistique. L'application n'intègre aucun kit de
+développement tiers de mesure d'audience, de publicité ou de suivi.
+
+Le bouton « Donner mon avis » des réglages est le seul lien vers l'extérieur :
+il ouvre, dans votre navigateur, un formulaire Google Forms externe où vous
+pouvez laisser un retour, entièrement facultatif. Vaulti n'y transmet rien
+automatiquement et ne reçoit aucune réponse : ce que vous choisissez d'y écrire
+relève de la politique de confidentialité de Google.
 
 ## 7. Achat intégré (Vaulti Premium)
 
