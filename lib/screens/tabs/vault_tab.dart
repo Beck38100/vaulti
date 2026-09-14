@@ -83,6 +83,13 @@ class _VaultTabState extends State<VaultTab> {
           onShowIssues: () => session.onGoToTab(4),
           hasPasswords: session.passwords.isNotEmpty,
         ),
+        // Seulement une fois qu'il y a quelque chose à perdre : au tout
+        // premier lancement, le coffre est encore vide, rien ne justifie
+        // d'insister sur la sauvegarde.
+        if (!session.hasBackupPassphrase && session.entries.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          _BackupReminder(onTap: session.onConfigureBackup),
+        ],
         const SizedBox(height: 22),
         TextField(
           controller: widget.searchController,
@@ -185,6 +192,43 @@ class _SearchResults extends StatelessWidget {
           ),
         ),
     ]);
+  }
+}
+
+/// Rappel discret tant qu'aucun mot de passe de sauvegarde n'est défini :
+/// sans lui, un téléphone perdu ou cassé emporte tout le coffre avec lui.
+class _BackupReminder extends StatelessWidget {
+  const _BackupReminder({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.warningBackground,
+      shape: cardShape(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(children: [
+            const Icon(Icons.warning_amber_rounded, color: AppColors.warning, size: 20),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                Text('Aucune sauvegarde configurée',
+                    style: TextStyle(color: AppColors.warningText, fontSize: 13.5, fontWeight: FontWeight.w600)),
+                SizedBox(height: 2),
+                Text('En cas de perte du téléphone, tout serait perdu',
+                    style: TextStyle(color: AppColors.warningText, fontSize: 12)),
+              ]),
+            ),
+            const Icon(Icons.chevron_right, color: AppColors.warningChevron, size: 20),
+          ]),
+        ),
+      ),
+    );
   }
 }
 

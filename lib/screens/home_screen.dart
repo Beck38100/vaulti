@@ -205,8 +205,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   /// Choix (ou remplacement) de la phrase secrète de sauvegarde.
+  ///
+  /// Un remplacement doit prouver qu'on connaît l'actuelle avant d'en accepter
+  /// une nouvelle : sans ça, un changement fait par erreur — ou par quelqu'un
+  /// d'autre tombé sur le téléphone déverrouillé — verrouillerait le vrai
+  /// propriétaire hors de ses futures sauvegardes sans qu'il s'en rende compte.
   Future<void> _configureBackupPassphrase() async {
-    final passphrase = await askNewPassphrase(context);
+    final isChange = _backupKey != null;
+    if (isChange && !await _confirmCurrentPassphrase()) return;
+    if (!mounted) return;
+
+    final passphrase = await askNewPassphrase(context, isChange: isChange);
     if (passphrase == null || !mounted) return;
 
     final prepared = await _backup.prepareKey(passphrase);
@@ -218,7 +227,34 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     await _repository.saveBackupKey(await prepared.key.extractBytes(), prepared.salt);
     await _refreshBackup(VaultData(folders: _folders, entries: _entries));
     if (!mounted) return;
-    _showMessage('Sauvegarde protégée. Note bien ton mot de passe.');
+    _showMessage(isChange ? 'Mot de passe de sauvegarde modifié.' : 'Sauvegarde protégée. Note bien ton mot de passe.');
+  }
+
+  /// Redemande la phrase actuelle avant un changement, en la vérifiant contre
+  /// la sauvegarde déjà chiffrée avec elle. Réessaie tant qu'elle est
+  /// refusée, sauf si l'utilisateur renonce.
+  Future<bool> _confirmCurrentPassphrase() async {
+    final envelope = await _backup.readEnvelope();
+    if (envelope == null || !mounted) return true; // rien à vérifier contre
+
+    String? errorText;
+    while (true) {
+      if (!mounted) return false;
+      final current = await askPassphrase(
+        context,
+        message: 'Confirme ton mot de passe de sauvegarde actuel avant d’en choisir un nouveau.',
+        errorText: errorText,
+      );
+      if (current == null) return false;
+
+      try {
+        await _backup.restore(envelope, current);
+        return true;
+      } on BackupDecryptException catch (error) {
+        if (!mounted) return false;
+        errorText = error.reason;
+      }
+    }
   }
 
   /// Enregistre une copie de la sauvegarde à l'endroit choisi par l'utilisateur.

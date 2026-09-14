@@ -7,8 +7,10 @@ import 'form_shell.dart';
 /// Choix du mot de passe qui protégera les sauvegardes.
 ///
 /// Il est saisi deux fois : une faute de frappe rendrait la sauvegarde
-/// définitivement illisible, sans aucun moyen de la récupérer.
-Future<String?> askNewPassphrase(BuildContext context) {
+/// définitivement illisible, sans aucun moyen de la récupérer. [isChange]
+/// adapte l'avertissement : une sauvegarde déjà exportée manuellement reste
+/// verrouillée par l'ancien mot de passe, pas le nouveau.
+Future<String?> askNewPassphrase(BuildContext context, {bool isChange = false}) {
   final firstCtrl = TextEditingController();
   final secondCtrl = TextEditingController();
   String? error;
@@ -34,7 +36,7 @@ Future<String?> askNewPassphrase(BuildContext context) {
         return VaultFormDialog(
           icon: Icons.shield_outlined,
           accent: AppColors.security,
-          title: 'Mot de passe de sauvegarde',
+          title: isChange ? 'Nouveau mot de passe de sauvegarde' : 'Mot de passe de sauvegarde',
           subtitle: 'Il protège tes sauvegardes',
           submitLabel: 'Enregistrer',
           onSubmit: submit,
@@ -46,15 +48,20 @@ Future<String?> askNewPassphrase(BuildContext context) {
                 color: AppColors.warningBackground,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Row(children: [
-                Icon(Icons.warning_amber_rounded, color: AppColors.warning, size: 20),
-                SizedBox(width: 10),
+              child: Row(children: [
+                const Icon(Icons.warning_amber_rounded, color: AppColors.warning, size: 20),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Note-le ailleurs. Si tu l’oublies, tes sauvegardes seront '
-                    'définitivement illisibles : personne ne peut les déverrouiller, '
-                    'moi non plus.',
-                    style: TextStyle(color: AppColors.warningText, fontSize: 12.5, height: 1.35),
+                    isChange
+                        ? 'Note-le ailleurs. Une sauvegarde déjà exportée manuellement reste '
+                            'verrouillée par l’ancien mot de passe, pas celui-ci — et si tu '
+                            'oublies ce nouveau, tes futures sauvegardes seront définitivement '
+                            'illisibles.'
+                        : 'Note-le ailleurs. Si tu l’oublies, tes sauvegardes seront '
+                            'définitivement illisibles : personne ne peut les déverrouiller, '
+                            'moi non plus.',
+                    style: const TextStyle(color: AppColors.warningText, fontSize: 12.5, height: 1.35),
                   ),
                 ),
               ]),
