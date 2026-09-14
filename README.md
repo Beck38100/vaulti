@@ -48,16 +48,22 @@ seuls, et c'est ce que fait `test/`.
 flutter pub get
 flutter test          # 45 tests
 flutter analyze
-flutter run
+flutter run --flavor production
 ```
+
+Deux flavors Android existent (`android/app/build.gradle.kts`) : `production`
+(`fr.vaulti.app`, l'appli réelle) et `dev` (`fr.vaulti.app.dev`, "Vaulti Dev"),
+installable en parallèle pour tester sans toucher à l'appli réelle. Toute
+commande `flutter run` / `flutter build` doit donc préciser `--flavor
+production` ou `--flavor dev`.
 
 Les icônes sont référencées via des structures de données, ce que l'élagage des
 polices d'icônes ne sait pas suivre. Toute compilation destinée à un appareil
 doit donc passer `--no-tree-shake-icons` :
 
 ```bash
-flutter build apk --release --no-tree-shake-icons
-flutter build appbundle --release --no-tree-shake-icons
+flutter build apk --flavor production --release --no-tree-shake-icons
+flutter build appbundle --flavor production --release --no-tree-shake-icons
 ```
 
 Régénérer l'icône de l'application après avoir changé `assets/icon/vaulti.png` :

@@ -1,6 +1,6 @@
 # Politique de confidentialité — Vaulti
 
-**Dernière mise à jour : 7 septembre 2026**
+**Dernière mise à jour : 14 septembre 2026**
 
 Vaulti est un gestionnaire de mots de passe qui fonctionne entièrement sur votre
 téléphone. Cette politique explique quelles données l'application manipule, où
@@ -65,7 +65,10 @@ Concrètement :
 - ni le développeur de Vaulti, ni Google, ni personne d'autre ne peut lire le
   contenu de cette sauvegarde sans ce mot de passe ;
 - **si vous oubliez ce mot de passe, la sauvegarde est définitivement
-  irrécupérable.** C'est la contrepartie de ce niveau de protection.
+  irrécupérable.** C'est la contrepartie de ce niveau de protection ;
+- le modifier exige de ressaisir l'actuel : personne ne peut donc le
+  remplacer à votre insu, par erreur ou après avoir eu accès à votre
+  téléphone déverrouillé.
 
 Vous pouvez désactiver cette sauvegarde à tout moment dans les réglages Android
 de votre téléphone (Système → Sauvegarde).
