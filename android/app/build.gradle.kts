@@ -30,6 +30,22 @@ android {
         versionName = flutter.versionName
     }
 
+    // Deux variantes, pour installer une version de test à côté de la vraie
+    // application sans jamais l'écraser : `flutter run --flavor production`
+    // (identifiant et nom inchangés) ou `--flavor dev` (fr.vaulti.app.dev,
+    // « Vaulti Dev »). Une fois des variantes définies, Gradle exige toujours
+    // d'en choisir une — il n'y a plus de commande sans --flavor.
+    flavorDimensions += "environment"
+    productFlavors {
+        create("production") {
+            dimension = "environment"
+        }
+        create("dev") {
+            dimension = "environment"
+            applicationId = "fr.vaulti.app.dev"
+        }
+    }
+
     signingConfigs {
         create("release") {
             // Sans key.properties (poste sans la clé), on n'échoue pas ici :
