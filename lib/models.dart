@@ -64,8 +64,6 @@ class VaultFolder {
   String title;
   String parentId;
 
-  bool get isRoot => parentId.isEmpty;
-
   factory VaultFolder.fromJson(Map<String, dynamic> json) {
     return VaultFolder(
       id: (json['id'] ?? '').toString(),

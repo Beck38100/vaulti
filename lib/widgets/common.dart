@@ -222,6 +222,58 @@ class WeaknessTag extends StatelessWidget {
   }
 }
 
+/// Bandeau d'alerte orange, cliquable.
+///
+/// Deux rappels l'utilisent — les mots de passe à corriger, sous la carte de
+/// score, et la sauvegarde non configurée — et ils peuvent s'afficher l'un
+/// sous l'autre : ils doivent donc suivre exactement les mêmes proportions.
+/// [shape] est laissée à l'appelant, le bandeau du score étant collé au bas
+/// de sa carte quand l'autre est une carte à part entière.
+class WarningStrip extends StatelessWidget {
+  const WarningStrip({
+    super.key,
+    required this.title,
+    required this.shape,
+    this.subtitle,
+    this.onTap,
+  });
+
+  final String title;
+  final ShapeBorder shape;
+  final String? subtitle;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.warningBackground,
+      shape: shape,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(children: [
+            const Icon(Icons.warning_amber_rounded, color: AppColors.warning, size: 19),
+            const SizedBox(width: 11),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                Text(title,
+                    style: const TextStyle(color: AppColors.warningText, fontSize: 13, fontWeight: FontWeight.w600)),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(subtitle!, style: const TextStyle(color: AppColors.warningText, fontSize: 12)),
+                ],
+              ]),
+            ),
+            const Icon(Icons.chevron_right, color: AppColors.warningChevron, size: 19),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
 /// Message affiché quand une liste est vide.
 ///
 /// [hint] sert à guider un premier usage : sans lui, un coffre vide n'indique

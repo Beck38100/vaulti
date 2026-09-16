@@ -27,7 +27,6 @@ class VaultSession {
     required this.onMoveFolder,
     required this.onDeleteFolder,
     required this.onOpenFolder,
-    required this.onAddFolder,
     required this.onGoToTab,
     required this.onRenameUser,
     required this.autoLockDelay,
@@ -48,7 +47,7 @@ class VaultSession {
   final Set<String> revealedIds;
   final String? userName;
 
-  /// Dossier actuellement ouvert dans l'onglet Coffre (null = racine).
+  /// Dossier actuellement ouvert dans l'onglet Dossiers (null = racine).
   final String? currentFolderId;
 
   final ValueChanged<VaultEntry> onToggleReveal;
@@ -61,7 +60,6 @@ class VaultSession {
   final ValueChanged<VaultFolder> onMoveFolder;
   final Future<bool> Function(VaultFolder) onDeleteFolder;
   final ValueChanged<String?> onOpenFolder;
-  final VoidCallback onAddFolder;
 
   final ValueChanged<int> onGoToTab;
 
@@ -104,6 +102,13 @@ class VaultSession {
 
   /// Nombre d'éléments directement contenus dans un dossier.
   int itemCountIn(String folderId) => foldersIn(folderId).length + entriesIn(folderId).length;
+
+  /// Dossier auquel remonter depuis celui ouvert (null = racine). Le fil
+  /// d'Ariane et le retour système suivent ainsi le même chemin.
+  String? get parentOfCurrentFolder {
+    final parentId = folderById(currentFolderId)?.parentId ?? '';
+    return parentId.isEmpty ? null : parentId;
+  }
 
   VaultFolder? folderById(String? id) {
     if (id == null || id.isEmpty) return null;

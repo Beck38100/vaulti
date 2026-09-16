@@ -119,10 +119,7 @@ SnackBar appSnackBar(String message, {bool isWarning = false}) {
     backgroundColor: AppColors.surface,
     behavior: SnackBarBehavior.floating,
     margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(20),
-      side: const BorderSide(color: AppColors.border),
-    ),
+    shape: cardShape(20),
     duration: const Duration(seconds: 3),
   );
 }

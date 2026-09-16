@@ -27,12 +27,7 @@ class _FoldersTabState extends State<FoldersTab> {
   /// sens du glissement (on entre ou on remonte).
   int _previousDepth = 0;
 
-  void _goToParentFolder() {
-    final session = widget.session;
-    final current = session.folderById(session.currentFolderId);
-    final parentId = current?.parentId ?? '';
-    session.onOpenFolder(parentId.isEmpty ? null : parentId);
-  }
+  void _goToParentFolder() => widget.session.onOpenFolder(widget.session.parentOfCurrentFolder);
 
   @override
   Widget build(BuildContext context) {

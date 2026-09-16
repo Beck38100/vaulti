@@ -40,13 +40,14 @@ lib/
 ```
 
 Le stockage et le chiffrement ne dépendent d'aucun widget : ils se testent
-seuls, et c'est ce que fait `test/`.
+seuls, et c'est ce que fait `test/`. Les tests d'interface partagent
+`test/helpers.dart`, qui fournit l'enveloppe `wrap()` et une session inerte.
 
 ## Développer
 
 ```bash
 flutter pub get
-flutter test          # 45 tests
+flutter test          # 47 tests
 flutter analyze
 flutter run --flavor production
 ```

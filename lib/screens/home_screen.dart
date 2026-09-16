@@ -752,8 +752,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _handleBackNavigation() {
     if (_selectedTab == 3 && _currentFolderId != null) {
-      final parentId = _buildSession().folderById(_currentFolderId)?.parentId;
-      setState(() => _currentFolderId = (parentId == null || parentId.isEmpty) ? null : parentId);
+      final parent = _buildSession().parentOfCurrentFolder;
+      setState(() => _currentFolderId = parent);
       return;
     }
     setState(() => _selectedTab = 0);
@@ -776,7 +776,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       onMoveFolder: _moveFolder,
       onDeleteFolder: _deleteFolder,
       onOpenFolder: (folderId) => setState(() => _currentFolderId = folderId),
-      onAddFolder: _createFolder,
       onGoToTab: (index) => setState(() => _selectedTab = index),
       onRenameUser: _askUserName,
       autoLockDelay: _autoLockDelay,

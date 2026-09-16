@@ -23,7 +23,7 @@ Color folderColor(String title) {
   final name = title.toLowerCase();
   // Quelques thèmes courants gardent une couleur reconnaissable.
   if (name.contains('orange')) return _folderPalette[0];
-  if (name.contains('mendes') || name.contains('famille')) return _folderPalette[1];
+  if (name.contains('famille')) return _folderPalette[1];
   if (name.contains('banque')) return _folderPalette[2];
   if (name.contains('stream')) return _folderPalette[5];
 
@@ -37,7 +37,7 @@ Color folderColor(String title) {
 IconData folderIcon(String title) {
   final name = title.toLowerCase();
   if (name.contains('orange') || name.contains('mobile')) return Icons.cell_tower;
-  if (name.contains('mendes') || name.contains('famille')) return Icons.groups_outlined;
+  if (name.contains('famille')) return Icons.groups_outlined;
   if (name.contains('banque')) return Icons.account_balance_outlined;
   if (name.contains('stream')) return Icons.videocam_outlined;
   return Icons.folder_outlined;

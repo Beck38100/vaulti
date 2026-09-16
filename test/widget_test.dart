@@ -7,10 +7,7 @@ import 'package:vaulti/widgets/common.dart';
 import 'package:vaulti/widgets/dashboard.dart';
 import 'package:vaulti/widgets/vault_items.dart';
 
-Widget wrap(Widget child) => MaterialApp(
-      theme: buildAppTheme(),
-      home: Scaffold(body: child),
-    );
+import 'helpers.dart';
 
 void main() {
   testWidgets('la carte de score affiche le score', (tester) async {
@@ -32,6 +29,29 @@ void main() {
 
     expect(find.text('faible'), findsOneWidget);
     expect(find.text('réutilisé'), findsOneWidget);
+  });
+
+  testWidgets('le bandeau d’alerte affiche son rappel et réagit au toucher', (tester) async {
+    var tapped = false;
+    await tester.pumpWidget(wrap(WarningStrip(
+      title: 'Aucune sauvegarde configurée',
+      subtitle: 'En cas de perte du téléphone, tout serait perdu',
+      shape: cardShape(),
+      onTap: () => tapped = true,
+    )));
+
+    expect(find.text('Aucune sauvegarde configurée'), findsOneWidget);
+    expect(find.text('En cas de perte du téléphone, tout serait perdu'), findsOneWidget);
+
+    await tester.tap(find.byType(WarningStrip));
+    expect(tapped, isTrue);
+  });
+
+  testWidgets('le même bandeau sans sous-titre tient sur une seule ligne', (tester) async {
+    await tester.pumpWidget(wrap(WarningStrip(title: '2 mots de passe à corriger', shape: cardShape())));
+
+    expect(find.text('2 mots de passe à corriger'), findsOneWidget);
+    expect(find.byType(Text), findsOneWidget);
   });
 
   testWidgets('une fiche masque son contenu tant qu’elle n’est pas révélée', (tester) async {

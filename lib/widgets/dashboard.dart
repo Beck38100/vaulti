@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme.dart';
 import 'animations.dart';
+import 'common.dart';
 
 /// Carte du score de sécurité.
 ///
@@ -120,43 +121,16 @@ class ScoreCard extends StatelessWidget {
           ]),
         ),
         // L'alerte fait partie de la carte : un seul bloc plutôt que deux.
-        if (toFixCount > 0) _IssuesStrip(count: toFixCount, onTap: onShowIssues),
-      ]),
-    );
-  }
-}
-
-/// Bandeau d'alerte intégré au bas de la carte de score.
-class _IssuesStrip extends StatelessWidget {
-  const _IssuesStrip({required this.count, this.onTap});
-
-  final int count;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final plural = count > 1 ? 's' : '';
-    return Material(
-      color: AppColors.warningBackground,
-      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(26)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(26)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-          child: Row(children: [
-            const Icon(Icons.warning_amber_rounded, color: AppColors.warning, size: 18),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                '$count mot$plural de passe à corriger',
-                style: const TextStyle(color: AppColors.warningText, fontSize: 13, fontWeight: FontWeight.w600),
-              ),
+        if (toFixCount > 0)
+          WarningStrip(
+            title: '$toFixCount mot${toFixCount > 1 ? 's' : ''} de passe à corriger',
+            // Collé au bas de la carte de score : seuls les coins bas s'arrondissent.
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(26)),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.warningChevron, size: 18),
-          ]),
-        ),
-      ),
+            onTap: onShowIssues,
+          ),
+      ]),
     );
   }
 }
