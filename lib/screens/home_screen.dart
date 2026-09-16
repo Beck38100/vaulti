@@ -744,6 +744,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     });
   }
 
+  /// Tant que le retour système (bouton ou geste) a un endroit où nous
+  /// ramener dans l'app, on l'intercepte plutôt que de quitter directement :
+  /// remonter d'un dossier, puis revenir au Coffre, et seulement ensuite
+  /// quitter.
+  bool get _hasBackTarget => (_selectedTab == 3 && _currentFolderId != null) || _selectedTab != 0;
+
+  void _handleBackNavigation() {
+    if (_selectedTab == 3 && _currentFolderId != null) {
+      final parentId = _buildSession().folderById(_currentFolderId)?.parentId;
+      setState(() => _currentFolderId = (parentId == null || parentId.isEmpty) ? null : parentId);
+      return;
+    }
+    setState(() => _selectedTab = 0);
+  }
+
   VaultSession _buildSession() {
     return VaultSession(
       folders: _folders,
@@ -781,41 +796,50 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final session = _buildSession();
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          // Material (et non un simple Container décoré) : les ListTile et les
-          // effets de contact peignent leur fond sur le Material le plus proche.
-          child: Material(
-            color: AppColors.shell,
-            clipBehavior: Clip.antiAlias,
-            borderRadius: BorderRadius.circular(28),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              AppHeader(onLock: _lock),
-              // IndexedStack conserve chaque onglet en mémoire : la position de
-              // défilement et les recherches en cours survivent au changement
-              // d'onglet, ce qui rend la navigation immédiate.
-              Expanded(
-                child: IndexedStack(
-                  index: _selectedTab,
-                  children: [
-                    VaultTab(session: session, searchController: _vaultSearchController),
-                    PasswordsTab(session: session),
-                    NotesTab(session: session),
-                    FoldersTab(session: session),
-                    SecurityTab(session: session),
-                    SettingsTab(session: session),
-                  ],
+    return PopScope(
+      // Sans dossier ouvert ni onglet secondaire actif, plus rien à
+      // ramener dans l'app : le retour système peut fermer Vaulti.
+      canPop: !_hasBackTarget,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _handleBackNavigation();
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            // Material (et non un simple Container décoré) : les ListTile et les
+            // effets de contact peignent leur fond sur le Material le plus proche.
+            child: Material(
+              color: AppColors.shell,
+              clipBehavior: Clip.antiAlias,
+              borderRadius: BorderRadius.circular(28),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                AppHeader(onLock: _lock),
+                // IndexedStack conserve chaque onglet en mémoire : la position de
+                // défilement et les recherches en cours survivent au changement
+                // d'onglet, ce qui rend la navigation immédiate.
+                Expanded(
+                  child: IndexedStack(
+                    index: _selectedTab,
+                    children: [
+                      VaultTab(session: session, searchController: _vaultSearchController),
+                      PasswordsTab(session: session),
+                      NotesTab(session: session),
+                      FoldersTab(session: session),
+                      SecurityTab(session: session),
+                      SettingsTab(session: session),
+                    ],
+                  ),
                 ),
-              ),
-              BottomNavBar(
-                selectedIndex: _selectedTab,
-                onSelect: _onNavTap,
-                onAdd: _openAddMenu,
-              ),
-            ]),
+                BottomNavBar(
+                  selectedIndex: _selectedTab,
+                  onSelect: _onNavTap,
+                  onAdd: _openAddMenu,
+                ),
+              ]),
+            ),
           ),
         ),
       ),
