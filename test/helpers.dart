@@ -46,6 +46,8 @@ VaultSession fakeSession({
     onExportBackup: () {},
     onImportBackup: () {},
     isPremium: isPremium,
-    onTogglePremiumForTesting: (_) {},
+    purchaseInProgress: false,
+    onBuyPremium: () {},
+    onRestorePurchase: () {},
   );
 }

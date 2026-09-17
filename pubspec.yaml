@@ -43,6 +43,8 @@ dependencies:
   file_picker: ^12.2.0
   # Ouvre le formulaire de retour dans le navigateur du téléphone.
   url_launcher: ^6.3.1
+  # Achat unique Premium via Google Play Facturation.
+  in_app_purchase: ^3.3.0
 
 dev_dependencies:
   flutter_test:

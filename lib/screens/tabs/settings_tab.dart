@@ -202,19 +202,31 @@ class _PremiumSection extends StatelessWidget {
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: FilledButton(
-          // Simule l'achat en attendant le branchement d'in_app_purchase, une
-          // fois les produits créés dans la Play Console.
-          onPressed: () => session.onTogglePremiumForTesting(true),
+          onPressed: session.purchaseInProgress ? null : session.onBuyPremium,
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.signature,
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(46),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
-          child: const Text('Passer à Premium (test)'),
+          child: session.purchaseInProgress
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
+                )
+              : const Text('Passer à Premium'),
         ),
       ),
-      const SizedBox(height: 18),
+      const SizedBox(height: 6),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: TextButton(
+          onPressed: session.purchaseInProgress ? null : session.onRestorePurchase,
+          child: Text('Restaurer mon achat', style: TextStyle(color: Colors.grey.shade400)),
+        ),
+      ),
+      const SizedBox(height: 12),
     ]);
   }
 }

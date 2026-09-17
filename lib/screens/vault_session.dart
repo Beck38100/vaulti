@@ -38,7 +38,9 @@ class VaultSession {
     required this.onExportBackup,
     required this.onImportBackup,
     required this.isPremium,
-    required this.onTogglePremiumForTesting,
+    required this.purchaseInProgress,
+    required this.onBuyPremium,
+    required this.onRestorePurchase,
   });
 
   final List<VaultFolder> folders;
@@ -77,11 +79,14 @@ class VaultSession {
   final VoidCallback onExportBackup;
   final VoidCallback onImportBackup;
 
-  /// Débloqué par achat unique. Sans magasin branché pour l'instant, ce
-  /// statut se simule depuis les Réglages en attendant l'intégration
-  /// d'in_app_purchase.
+  /// Débloqué par achat unique via Google Play Facturation.
   final bool isPremium;
-  final ValueChanged<bool> onTogglePremiumForTesting;
+
+  /// Vrai pendant qu'un achat ou une restauration est en cours : le bouton
+  /// correspondant se désactive pour éviter un double appui.
+  final bool purchaseInProgress;
+  final VoidCallback onBuyPremium;
+  final VoidCallback onRestorePurchase;
 
   /// Usage courant face aux limites de la version gratuite.
   PremiumUsage get premiumUsage => PremiumUsage.from(folders, entries);

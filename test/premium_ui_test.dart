@@ -58,7 +58,8 @@ void main() {
     expect(find.text('1 / 20'), findsOneWidget); // mots de passe
     expect(find.text('1 / 10'), findsOneWidget); // notes
     expect(find.text('0 / 3'), findsOneWidget); // dossiers
-    expect(find.text('Passer à Premium (test)'), findsOneWidget);
+    expect(find.text('Passer à Premium'), findsOneWidget);
+    expect(find.text('Restaurer mon achat'), findsOneWidget);
   });
 
   testWidgets('les réglages affichent le statut Premium sans limite', (tester) async {
@@ -70,6 +71,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Premium actif'), findsOneWidget);
-    expect(find.text('Passer à Premium (test)'), findsNothing);
+    expect(find.text('Passer à Premium'), findsNothing);
   });
 }

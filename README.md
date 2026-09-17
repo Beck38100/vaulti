@@ -1,7 +1,8 @@
 # Vaulti
 
-Gestionnaire de mots de passe Android, hors ligne. Aucun compte, aucun serveur,
-aucune permission réseau : tout reste sur le téléphone.
+Gestionnaire de mots de passe Android, hors ligne. Aucun compte, aucun serveur :
+tout reste sur le téléphone. Seule exception, minimale : l'achat Premium
+optionnel, géré par Google Play Facturation.
 
 ## Ce que fait l'application
 
@@ -34,6 +35,8 @@ lib/
   secure_clipboard.dart     copie marquée sensible, effacement du presse-papiers
   backup_crypto.dart        chiffrement de la sauvegarde
   backup_service.dart       fichier de sauvegarde et restauration
+  premium.dart              limites de la version gratuite
+  purchase_service.dart     achat Premium (Google Play Facturation)
   dialogs.dart              regroupe lib/dialogs/ (voir l'en-tête du fichier)
   screens/                  écrans et onglets
   widgets/                  composants réutilisables
@@ -95,6 +98,24 @@ L'app elle-même n'envoie ni ne reçoit rien : `LaunchMode.externalApplication`
 délègue entièrement au navigateur, donc aucune permission réseau n'est
 nécessaire côté Vaulti. Le lien est en dur dans `_feedbackFormUrl` ; le
 modifier suffit à changer de formulaire.
+
+## Achat Premium
+
+`lib/purchase_service.dart` s'appuie sur `in_app_purchase` (Google Play
+Facturation), pour un produit unique non consommable dont l'identifiant est
+`premiumProductId` — actuellement `vaulti_premium_lifetime`. Cet identifiant
+doit exister, à l'identique, comme produit géré dans Play Console : c'est le
+seul lien entre le code et la fiche du produit côté Google.
+
+La validation reste côté appareil (`VaultRepository.saveIsPremium`), sans
+serveur pour vérifier le reçu — comme la plupart des petites applications
+indépendantes.
+
+**La facturation ne se teste pas avec `flutter run` ni un APK installé à la
+main.** Google exige que l'app soit reconnue par le Play Store : il faut donc
+l'envoyer sur une piste de test (interne suffit) avec le flavor `production`
+(seul `fr.vaulti.app` correspond à la fiche Play Console), puis s'ajouter
+soi-même comme testeur de licence pour acheter sans être débité.
 
 ## Politique de confidentialité
 

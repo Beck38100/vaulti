@@ -12,6 +12,7 @@ import '../backup_service.dart';
 import '../dialogs.dart';
 import '../models.dart';
 import '../premium.dart';
+import '../purchase_service.dart';
 import '../screen_security.dart';
 import '../secure_clipboard.dart';
 import '../theme.dart';
@@ -41,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final _screenSecurity = const ScreenSecurity();
   final _clipboard = const SecureClipboard();
   final _backup = const BackupService();
+  final _purchases = PurchaseService();
   final _vaultSearchController = TextEditingController();
 
   List<VaultFolder> _folders = [];
@@ -49,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   String? _userName;
   bool _isPremium = false;
+  bool _purchaseInProgress = false;
   int _selectedTab = 0;
   String? _currentFolderId;
 
@@ -88,6 +91,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _loadUserName();
     _loadSecuritySettings();
     _loadPremiumStatus();
+    _purchases.listen(onEntitled: _onPremiumEntitled, onError: _onPurchaseError);
     _openVault();
   }
 
@@ -105,6 +109,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _revealTimer?.cancel();
     _clipboardTimer?.cancel();
+    _purchases.dispose();
     _vaultSearchController.dispose();
     super.dispose();
   }
@@ -383,11 +388,38 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     setState(() => _isPremium = isPremium);
   }
 
-  Future<void> _setPremiumForTesting(bool isPremium) async {
-    setState(() => _isPremium = isPremium);
-    await _repository.saveIsPremium(isPremium);
+  /// Un achat accepté ou restauré arrive ici de façon asynchrone, depuis
+  /// [PurchaseService.listen] : impossible de savoir à l'avance si ce sera
+  /// dans la même seconde que l'appui sur « Passer à Premium », ou bien plus
+  /// tard si Google demande une confirmation supplémentaire.
+  Future<void> _onPremiumEntitled() async {
+    if (_isPremium) return; // déjà pris en compte (restauration après achat)
+    setState(() => _isPremium = true);
+    await _repository.saveIsPremium(true);
     if (!mounted) return;
-    _showMessage(isPremium ? 'Premium activé (test) : plus aucune limite.' : 'Premium désactivé (test).');
+    _showMessage('Premium activé : plus aucune limite. Merci !');
+  }
+
+  void _onPurchaseError(String message) {
+    if (!mounted) return;
+    _showMessage(message, isWarning: true);
+  }
+
+  Future<void> _buyPremium() async {
+    if (_purchaseInProgress) return;
+    setState(() => _purchaseInProgress = true);
+    final error = await _purchases.buy();
+    if (!mounted) return;
+    setState(() => _purchaseInProgress = false);
+    if (error != null) _showMessage(error, isWarning: true);
+  }
+
+  Future<void> _restorePurchase() async {
+    if (_purchaseInProgress) return;
+    setState(() => _purchaseInProgress = true);
+    await _purchases.restore();
+    if (!mounted) return;
+    setState(() => _purchaseInProgress = false);
   }
 
   /// Bloque la création avec un paywall si la limite gratuite est atteinte.
@@ -787,7 +819,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       onExportBackup: _exportBackup,
       onImportBackup: _importBackup,
       isPremium: _isPremium,
-      onTogglePremiumForTesting: _setPremiumForTesting,
+      purchaseInProgress: _purchaseInProgress,
+      onBuyPremium: _buyPremium,
+      onRestorePurchase: _restorePurchase,
     );
   }
 
