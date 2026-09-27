@@ -1,11 +1,14 @@
 package fr.vaulti.app
 
+import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.provider.Settings
 import android.view.WindowManager
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -16,6 +19,7 @@ class MainActivity : FlutterFragmentActivity() {
     private companion object {
         const val SCREEN_CHANNEL = "vaulti/screen_security"
         const val CLIPBOARD_CHANNEL = "vaulti/secure_clipboard"
+        const val SETTINGS_CHANNEL = "vaulti/device_settings"
 
         /** Identifie les copies faites par Vaulti, pour ne vider que les siennes. */
         const val CLIP_LABEL = "Vaulti"
@@ -56,6 +60,30 @@ class MainActivity : FlutterFragmentActivity() {
                     else -> result.notImplemented()
                 }
             }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, SETTINGS_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "openSecuritySettings" -> {
+                        openSecuritySettings()
+                        result.success(null)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+    }
+
+    /**
+     * Ouvre l'écran où l'on configure le verrouillage du téléphone. Certains
+     * constructeurs ne l'exposent pas sous ce nom : on retombe alors sur
+     * l'accueil des paramètres, plutôt que de ne rien ouvrir.
+     */
+    private fun openSecuritySettings() {
+        try {
+            startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+        } catch (e: ActivityNotFoundException) {
+            startActivity(Intent(Settings.ACTION_SETTINGS))
+        }
     }
 
     /**

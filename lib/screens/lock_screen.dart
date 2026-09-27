@@ -15,7 +15,7 @@ class LockScreen extends StatefulWidget {
 class _LockScreenState extends State<LockScreen> {
   final _auth = AuthService();
   bool _isAuthenticating = false;
-  String? _error;
+  AuthResult? _lastResult;
 
   @override
   void initState() {
@@ -27,7 +27,7 @@ class _LockScreenState extends State<LockScreen> {
     if (_isAuthenticating) return;
     setState(() {
       _isAuthenticating = true;
-      _error = null;
+      _lastResult = null;
     });
 
     final result = await _auth.authenticate('Déverrouille ton coffre Vaulti');
@@ -43,14 +43,15 @@ class _LockScreenState extends State<LockScreen> {
 
     setState(() {
       _isAuthenticating = false;
-      _error = result.error == null
-          ? 'Authentification refusée. Réessaie pour ouvrir ton coffre.'
-          : 'Authentification indisponible sur cet appareil.';
+      _lastResult = result;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final message = _lastResult?.message;
+    final needsDeviceLock = _lastResult?.outcome == AuthOutcome.noDeviceLock;
+
     return Scaffold(
       body: Center(
         child: Padding(
@@ -65,18 +66,28 @@ class _LockScreenState extends State<LockScreen> {
               style: TextStyle(color: Colors.grey.shade400),
             ),
             const SizedBox(height: 30),
-            if (_error != null) ...[
+            if (message != null) ...[
               Text(
-                _error!,
+                message,
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: AppColors.warningText, fontSize: 13),
               ),
               const SizedBox(height: 16),
             ],
+            // Sans verrouillage, réessayer ne mène nulle part : l'action utile
+            // passe en premier, le déverrouillage reste disponible pour le retour.
+            if (needsDeviceLock) ...[
+              FilledButton.icon(
+                onPressed: _auth.openDeviceLockSettings,
+                icon: const Icon(Icons.settings_outlined),
+                label: const Text('Ouvrir les réglages de sécurité'),
+              ),
+              const SizedBox(height: 10),
+            ],
             ElevatedButton.icon(
               onPressed: _isAuthenticating ? null : _unlock,
               icon: const Icon(Icons.fingerprint),
-              label: const Text('Déverrouiller'),
+              label: Text(needsDeviceLock ? 'C’est fait, réessayer' : 'Déverrouiller'),
             ),
           ]),
         ),

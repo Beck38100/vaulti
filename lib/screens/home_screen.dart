@@ -496,14 +496,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _revealTimer = Timer(_revealDuration, () {
         if (mounted) setState(_revealedIds.clear);
       });
-    } else if (result.error != null) {
-      _showMessage('Authentification indisponible sur cet appareil.');
+    } else if (result.message != null) {
+      _showMessage(result.message!, isWarning: true);
     }
   }
 
   Future<void> _copyPassword(VaultEntry entry) async {
     final result = await _authenticate('Authentifie-toi pour copier ce mot de passe');
-    if (!mounted || !result.granted) return;
+    if (!mounted) return;
+    if (!result.granted) {
+      if (result.message != null) _showMessage(result.message!, isWarning: true);
+      return;
+    }
     await _clipboard.copy(entry.password);
     if (!mounted) return;
     _scheduleClipboardWipe();
