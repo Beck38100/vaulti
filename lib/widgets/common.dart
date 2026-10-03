@@ -146,7 +146,7 @@ class PasswordStrengthBar extends StatelessWidget {
       ClipRRect(
         borderRadius: BorderRadius.circular(4),
         child: TweenAnimationBuilder<double>(
-          duration: Motion.normal,
+          duration: Motion.of(context, Motion.normal),
           curve: Motion.curve,
           tween: Tween(end: result.score),
           builder: (context, value, _) => LinearProgressIndicator(

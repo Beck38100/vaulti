@@ -13,7 +13,9 @@ Future<AddChoice?> showAddMenu(BuildContext context) {
     context: context,
     backgroundColor: AppColors.sheet,
     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
-    sheetAnimationStyle: AnimationStyle(duration: Motion.normal, curve: Motion.spring),
+    sheetAnimationStyle: Motion.reduced(context)
+        ? AnimationStyle.noAnimation
+        : AnimationStyle(duration: Motion.normal, curve: Motion.spring),
     builder: (ctx) => SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),

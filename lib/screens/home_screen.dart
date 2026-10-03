@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:file_picker/file_picker.dart';
@@ -394,6 +395,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// tard si Google demande une confirmation supplémentaire.
   Future<void> _onPremiumEntitled() async {
     if (_isPremium) return; // déjà pris en compte (restauration après achat)
+    HapticFeedback.mediumImpact();
     setState(() => _isPremium = true);
     await _repository.saveIsPremium(true);
     if (!mounted) return;
@@ -489,6 +491,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final result = await _authenticate('Authentifie-toi pour révéler ce contenu');
     if (!mounted) return;
     if (result.granted) {
+      HapticFeedback.selectionClick();
       setState(() => _revealedIds.add(entry.id));
       // Remasquage automatique : un mot de passe affiché ne doit pas le rester
       // si le téléphone est posé sur une table.
@@ -510,6 +513,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
     await _clipboard.copy(entry.password);
     if (!mounted) return;
+    HapticFeedback.lightImpact();
     _scheduleClipboardWipe();
     _showMessage('Copié — le presse-papiers sera vidé dans 45 secondes.');
   }
@@ -628,6 +632,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       message: 'Cette fiche sera définitivement supprimée. Cette action est irréversible.',
     );
     if (!confirmed || !mounted) return false;
+    HapticFeedback.mediumImpact();
     final title = entry.title;
     setState(() {
       _entries.removeWhere((item) => item.id == entry.id);
@@ -689,6 +694,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       message: 'Les sous-dossiers et les éléments contenus seront également supprimés. Cette action est irréversible.',
     );
     if (!confirmed || !mounted) return false;
+    HapticFeedback.mediumImpact();
 
     final removed = _descendantIds(folder.id)..add(folder.id);
     final title = folder.title;

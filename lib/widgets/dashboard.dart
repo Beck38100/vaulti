@@ -74,7 +74,7 @@ class ScoreCard extends StatelessWidget {
               height: 64,
               child: hasPasswords
                   ? TweenAnimationBuilder<double>(
-                      duration: Motion.draw,
+                      duration: Motion.of(context, Motion.draw),
                       curve: Motion.curve,
                       // begin à zéro : l'anneau se trace au premier affichage, puis
                       // les mises à jour repartent de la valeur courante.

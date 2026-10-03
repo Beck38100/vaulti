@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../auth_service.dart';
 import '../theme.dart';
@@ -34,6 +35,7 @@ class _LockScreenState extends State<LockScreen> {
     if (!mounted) return;
 
     if (result.granted) {
+      HapticFeedback.lightImpact();
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const HomeScreen()),

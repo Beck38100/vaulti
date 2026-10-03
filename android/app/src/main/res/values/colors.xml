@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#0E1233</color>
+    <!-- Même fond que l'application (AppColors.background), pour éviter tout flash clair au lancement. -->
+    <color name="launch_background">#0B0F14</color>
 </resources>

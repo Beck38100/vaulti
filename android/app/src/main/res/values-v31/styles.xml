@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Vaulti est toujours sombre : ces thèmes le sont aussi, quel que soit le
-         mode du téléphone, sinon un fond clair apparaît un instant au lancement. -->
-
-    <!-- Thème de la fenêtre pendant le démarrage du processus. -->
+    <!-- Android 12+ affiche son propre écran de lancement : sans cette couleur
+         explicite, il reprend le fond du thème système, clair ou sombre. -->
     <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
         <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:windowSplashScreenBackground">@color/launch_background</item>
     </style>
-    <!-- Thème de la fenêtre dès que le processus tourne, derrière l'interface
-         Flutter pendant son initialisation. -->
     <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
         <item name="android:windowBackground">@color/launch_background</item>
+        <item name="android:windowSplashScreenBackground">@color/launch_background</item>
     </style>
 </resources>

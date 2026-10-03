@@ -22,6 +22,13 @@ class Motion {
 
   /// Léger dépassement, pour les surfaces qui surgissent (menu d'ajout).
   static const spring = Curves.easeOutBack;
+
+  /// Vrai quand l'utilisateur a demandé de réduire les animations (réglage
+  /// Android « Supprimer les animations ») : tout mouvement doit alors disparaître.
+  static bool reduced(BuildContext context) => MediaQuery.disableAnimationsOf(context);
+
+  /// [duration], ramenée à zéro quand les animations sont réduites.
+  static Duration of(BuildContext context, Duration duration) => reduced(context) ? Duration.zero : duration;
 }
 
 /// Fait apparaître son contenu en fondu, avec une légère montée.
@@ -39,6 +46,7 @@ class AppearIn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (Motion.reduced(context)) return child;
     return TweenAnimationBuilder<double>(
       duration: Motion.normal,
       curve: Motion.curve,
@@ -72,7 +80,9 @@ class _PressScaleState extends State<PressScale> {
   @override
   Widget build(BuildContext context) {
     return AnimatedScale(
-      scale: _pressed ? 0.97 : 1,
+      // L'ondulation de l'InkWell suffit à accuser réception quand les
+      // animations sont réduites : la carte ne rétrécit plus.
+      scale: _pressed && !Motion.reduced(context) ? 0.97 : 1,
       duration: Motion.quick,
       curve: Motion.curve,
       child: widget.builder(context, (value) => setState(() => _pressed = value)),
@@ -101,7 +111,7 @@ class DirectionalSwitcher extends StatelessWidget {
   Widget build(BuildContext context) {
     final goingDeeper = depth >= previousDepth;
     return AnimatedSwitcher(
-      duration: Motion.normal,
+      duration: Motion.of(context, Motion.normal),
       switchInCurve: Motion.curve,
       switchOutCurve: Motion.curve,
       // Seul le contenu entrant est animé : superposer la sortie provoquerait

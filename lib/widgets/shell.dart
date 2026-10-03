@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import 'animations.dart';
 
 /// Bandeau supérieur permanent : identité de l'application et verrouillage rapide.
 class AppHeader extends StatelessWidget {
@@ -113,7 +114,7 @@ class _NavItem extends StatelessWidget {
       tooltip: destination.label,
       onPressed: onTap,
       icon: AnimatedScale(
-        duration: const Duration(milliseconds: 180),
+        duration: Motion.of(context, Motion.quick),
         curve: Curves.easeOut,
         scale: selected ? 1.15 : 1,
         child: Icon(
