@@ -50,7 +50,7 @@ seuls, et c'est ce que fait `test/`. Les tests d'interface partagent
 
 ```bash
 flutter pub get
-flutter test          # 51 tests
+flutter test          # 55 tests
 flutter analyze
 flutter run --flavor production
 ```

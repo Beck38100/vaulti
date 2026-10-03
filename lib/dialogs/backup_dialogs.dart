@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../password_strength.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import 'form_shell.dart';
@@ -22,8 +23,11 @@ Future<String?> askNewPassphrase(BuildContext context, {bool isChange = false}) 
       builder: (ctx, setDialogState) {
         void submit() {
           final value = firstCtrl.text;
-          if (value.length < 8) {
-            setDialogState(() => error = 'Choisis au moins 8 caractères.');
+          // Un fichier de sauvegarde peut être attaqué hors ligne, sans limite
+          // d'essais : un mot de passe faible annulerait tout le chiffrement.
+          final strength = evaluatePassword(value);
+          if (strength.isWeak) {
+            setDialogState(() => error = 'Trop faible pour protéger une sauvegarde. ${strength.hint}.');
             return;
           }
           if (value != secondCtrl.text) {
@@ -81,10 +85,11 @@ Future<String?> askNewPassphrase(BuildContext context, {bool isChange = false}) 
                   onPressed: () => setDialogState(() => visible = !visible),
                 ),
               ),
-              onChanged: (_) {
-                if (error != null) setDialogState(() => error = null);
-              },
+              // Reconstruit à chaque frappe pour que la jauge suive la saisie.
+              onChanged: (_) => setDialogState(() => error = null),
             ),
+            const SizedBox(height: 10),
+            PasswordStrengthBar(password: firstCtrl.text),
             const SizedBox(height: 16),
             const FormLabel('Confirmation'),
             TextField(
