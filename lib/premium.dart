@@ -3,14 +3,17 @@ import 'models.dart';
 /// Limites de la version gratuite et calcul de l'usage courant.
 ///
 /// Achat unique (pas d'abonnement) : une fois Premium débloqué, plus aucune
-/// limite ne s'applique. Chiffres provisoires, à ajuster une fois le prix
-/// fixé — c'est le seul endroit à modifier.
+/// limite ne s'applique. C'est le seul endroit où les chiffres sont écrits ;
+/// la fiche Play Store les cite aussi, à tenir à jour à la main.
+///
+/// Les limites ne bloquent que la création : un coffre qui les dépasse déjà
+/// (anciennes limites plus larges) garde toutes ses fiches.
 class PremiumLimits {
   const PremiumLimits._();
 
   static const maxFolders = 3;
-  static const maxPasswords = 20;
-  static const maxNotes = 10;
+  static const maxPasswords = 10;
+  static const maxNotes = 8;
 }
 
 /// Photographie de l'usage du coffre face aux limites de la version gratuite.

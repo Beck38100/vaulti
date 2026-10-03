@@ -36,8 +36,8 @@ void main() {
 
     expect(find.text('Version gratuite'), findsOneWidget);
     expect(find.textContaining('3 dossiers'), findsOneWidget);
-    expect(find.textContaining('20 mots de passe'), findsOneWidget);
-    expect(find.textContaining('10 notes'), findsOneWidget);
+    expect(find.textContaining('10 mots de passe'), findsOneWidget);
+    expect(find.textContaining('8 notes'), findsOneWidget);
   });
 
   testWidgets('les réglages affichent le suivi de la version gratuite', (tester) async {
@@ -55,8 +55,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Version gratuite'), findsOneWidget);
-    expect(find.text('1 / 20'), findsOneWidget); // mots de passe
-    expect(find.text('1 / 10'), findsOneWidget); // notes
+    expect(find.text('1 / 10'), findsOneWidget); // mots de passe
+    expect(find.text('1 / 8'), findsOneWidget); // notes
     expect(find.text('0 / 3'), findsOneWidget); // dossiers
     expect(find.text('Passer à Premium'), findsOneWidget);
     expect(find.text('Restaurer mon achat'), findsOneWidget);

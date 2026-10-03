@@ -25,6 +25,21 @@ void main() {
       expect(usage.noteLimitReached, isFalse);
     });
 
+    test('les limites gratuites sont celles annoncées sur la fiche Play Store', () {
+      expect(PremiumLimits.maxFolders, 3);
+      expect(PremiumLimits.maxPasswords, 10);
+      expect(PremiumLimits.maxNotes, 8);
+    });
+
+    test('un coffre déjà au-dessus des limites reste utilisable et bloque seulement l’ajout', () {
+      final usage = PremiumUsage.from(
+        [],
+        List.generate(PremiumLimits.maxPasswords + 5, (i) => password('p$i')),
+      );
+      expect(usage.passwordCount, PremiumLimits.maxPasswords + 5);
+      expect(usage.passwordLimitReached, isTrue);
+    });
+
     test('la limite se déclenche une fois le quota atteint', () {
       final usage = PremiumUsage.from(
         List.generate(PremiumLimits.maxFolders, (i) => folder('f$i')),
