@@ -8,12 +8,12 @@ Vaulti est un gestionnaire de mots de passe Android hors ligne : aucun compte, a
 
 Modèle économique : version gratuite limitée (3 dossiers, 10 mots de passe, 8 notes) et achat unique Premium à vie, sans abonnement (`lib/premium.dart`, `test/premium_test.dart`). Prix : 4,99 € (Play Console).
 
-Objectif en cours : obtenir l'accès à la production sur Google Play (test fermé de 14 jours consécutifs avec au moins 12 testeurs, puis formulaire d'accès production). Le test est en cours, pas encore terminé ; date de début [à confirmer].
+Objectif en cours : obtenir l'accès à la production sur Google Play (test fermé de 14 jours consécutifs avec au moins 12 testeurs, puis formulaire d'accès production). Le test est en cours, pas encore terminé ; soumis le 2026-10-03 (jour 1), donc jour 14 le 2026-10-16 si Google compte bien depuis cette date [à confirmer : les 14 jours Google comptent depuis l'inscription d'au moins 12 testeurs].
 
 ## Technologie
 
 - Flutter / Dart (`sdk: ^3.13.2`), application Android uniquement (`ios/` est un gabarit inutilisé).
-- Package `fr.vaulti.app`, version actuelle `1.0.4+5` (`pubspec.yaml`).
+- Package `fr.vaulti.app`, version du code `1.0.4+5` (`pubspec.yaml`) ; version publiée dans Play Console : 1.0.2 (voir « État »).
 - Deux flavors Android : `production` (`fr.vaulti.app`) et `dev` (`fr.vaulti.app.dev`, « Vaulti Dev », installable en parallèle).
 - Stockage : `flutter_secure_storage`. Déverrouillage : `local_auth`. Sauvegarde chiffrée : PBKDF2-HMAC-SHA256 (120 000 itérations) + AES-256-GCM (`cryptography`).
 - Code natif Android : `MainActivity.kt` (FLAG_SECURE, presse-papiers sensible).
@@ -48,7 +48,7 @@ Tirées de CLAUDE.md, README.md et du dépôt :
 - Limites gratuites resserrées en 1.0.4 : 3 dossiers, 10 mots de passe, 8 notes (commit b704a94).
 - Sauvegarde chiffrée reprise par la sauvegarde automatique d'Android.
 - Décision prise : l'appli est en test chez Testers Community. Test fermé : piste « Alpha » ; testeurs recrutés via le service payant Testers Community (formule Starter, 15 testeurs) ; la liste de la famille a été abandonnée volontairement ; publication gérée activée dans Play Console.
-- Trois mises à jour (1.0.2, 1.0.3, 1.0.4) envoyées une à une pendant le test, parce que Testers Community exige au moins 3 nouvelles versions visibles.
+- Trois mises à jour (1.0.2, 1.0.3, 1.0.4) à envoyer une à une pendant le test (seule la 1.0.2 l'est à ce jour), parce que Testers Community exige au moins 3 nouvelles versions visibles.
 
 ## Outils et bibliothèques utilisés
 
@@ -73,17 +73,17 @@ Catalogue d'outils personnel (`catalogue-outils`) : [à confirmer : non consult�
 - Application 1.0.0 : coffre hors ligne, sauvegarde chiffrée, fiche Play Store, politique de confidentialité en ligne.
 - 1.0.1 : verrouillage sans code d'appareil mieux guidé, annulation de l'empreinte non traitée comme une panne.
 - Achat Premium réel branché (Google Play Facturation).
-- 1.0.2 : jauge de solidité de la phrase de sauvegarde, texte 12 px, icône thématique Android 13+.
-- 1.0.3 : réduction des animations respectée, retours haptiques, lancement sombre sans flash clair.
-- 1.0.4 : version gratuite resserrée à 10 mots de passe et 8 notes.
-- Tout est poussé sur GitHub ; les fichiers de version sont dans `../vaulti-releases/`.
+- Compilées le 2026-10-03 (fichiers dans `../vaulti-releases/`), commitées et poussées sur GitHub ; **seule la 1.0.2 est publiée** dans Play Console, les 1.0.3 et 1.0.4 ne sont pas encore envoyées :
+- 1.0.2 (publiée le 2026-10-08) : jauge de solidité de la phrase de sauvegarde, texte 12 px, icône thématique Android 13+.
+- 1.0.3 (compilée, pas envoyée) : réduction des animations respectée, retours haptiques, lancement sombre sans flash clair.
+- 1.0.4 (compilée, pas envoyée) : version gratuite resserrée à 10 mots de passe et 8 notes.
 
 **En cours**
-- 1.0.2 envoyée pour examen dans Play Console (au 2026-10-07) ; il restera à cliquer « Publier » après approbation.
+- 1.0.2 approuvée par Google et publiée le 2026-10-08 : en cours de diffusion aux testeurs.
 - Test fermé de 14 jours avec Testers Community.
 
 **À faire**
-- Envoyer 1.0.3 (environ jours 7-8) puis 1.0.4 (environ jours 11-12), chacune avec ses notes de version.
+- Envoyer 1.0.3 (jours 7-8, soit le 9 ou 10 octobre) puis 1.0.4 (jours 11-12, soit le 13 ou 14 octobre), chacune avec ses notes de version.
 - Mettre à jour la description du Play Store (« jusqu'à 3 dossiers, 10 mots de passe et 8 notes ») à la sortie de la 1.0.4.
 - Vérifier les installations et le nombre de testeurs inscrits (au moins 12), puis remplir le formulaire d'accès production.
 - Vérifier sur un vrai téléphone : haptique, lancement sans flash blanc en mode clair, icône thématique.
