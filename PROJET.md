@@ -1,6 +1,6 @@
 # PROJET.md — Vaulti
 
-Dernière mise à jour : 2026-10-08
+Dernière mise à jour : 2026-10-09
 
 ## Objectif
 
@@ -8,7 +8,7 @@ Vaulti est un gestionnaire de mots de passe Android hors ligne : aucun compte, a
 
 Modèle économique : version gratuite limitée (3 dossiers, 10 mots de passe, 8 notes) et achat unique Premium à vie, sans abonnement (`lib/premium.dart`, `test/premium_test.dart`). Prix : 4,99 € (Play Console).
 
-Objectif en cours : obtenir l'accès à la production sur Google Play (test fermé de 14 jours consécutifs avec au moins 12 testeurs, puis formulaire d'accès production). Le test est en cours, pas encore terminé ; soumis le 2026-10-03 (jour 1), donc jour 14 le 2026-10-16 si Google compte bien depuis cette date [à confirmer : les 14 jours Google comptent depuis l'inscription d'au moins 12 testeurs].
+Objectif en cours : obtenir l'accès à la production sur Google Play (test fermé de 14 jours consécutifs avec au moins 12 testeurs, puis formulaire d'accès production). Le test est en cours : soumis chez Testers Community le 2026-10-03 (leur forfait dure 16 jours, fin vers le 18-19 octobre). Côté Google, le tableau de bord indiquait le 2026-10-09 « 12 testeurs inscrits depuis 6 jours sans interruption » : jour 14 attendu vers le 2026-10-17. Si le nombre d'inscrits passe sous 12, le compteur repart de zéro.
 
 ## Technologie
 
@@ -48,6 +48,7 @@ Tirées de CLAUDE.md, README.md et du dépôt :
 - Limites gratuites resserrées en 1.0.4 : 3 dossiers, 10 mots de passe, 8 notes (commit b704a94).
 - Sauvegarde chiffrée reprise par la sauvegarde automatique d'Android.
 - Décision prise : l'appli est en test chez Testers Community. Test fermé : piste « Alpha » ; testeurs recrutés via le service payant Testers Community (formule Starter, 15 testeurs) ; la liste de la famille a été abandonnée volontairement ; publication gérée activée dans Play Console.
+- 2026-10-08 : les 3 versions (1.0.2 à 1.0.4) sont étalées sur la durée du test parce que Testers Community l'exige ; 1.0.2 publiée le 8 octobre.
 - Trois mises à jour (1.0.2, 1.0.3, 1.0.4) à envoyer une à une pendant le test (seule la 1.0.2 l'est à ce jour), parce que Testers Community exige au moins 3 nouvelles versions visibles.
 
 ## Outils et bibliothèques utilisés
@@ -65,7 +66,7 @@ Développement : `flutter_lints` ^6.0.0, `flutter_launcher_icons` ^0.14.4.
 
 Services externes : Play Console, GitHub Pages (politique de confidentialité), Google Forms (retour utilisateur), Testers Community.
 
-Catalogue d'outils personnel (`catalogue-outils`) : [à confirmer : non consulté pour ce projet, déjà construit avant].
+Catalogue d'outils personnel (`catalogue-outils`) : aucune de ces 7 dépendances n'y figure (il ne contient aucune entrée Flutter), toutes sont hors catalogue.
 
 ## État
 
@@ -83,9 +84,9 @@ Catalogue d'outils personnel (`catalogue-outils`) : [à confirmer : non consult�
 - Test fermé de 14 jours avec Testers Community.
 
 **À faire**
-- Envoyer 1.0.3 (jours 7-8, soit le 9 ou 10 octobre) puis 1.0.4 (jours 11-12, soit le 13 ou 14 octobre), chacune avec ses notes de version.
+- Envoyer 1.0.3 (le 9 ou 10 octobre) puis 1.0.4 (le 13 ou 14 octobre), chacune avec ses notes de version.
 - Mettre à jour la description du Play Store (« jusqu'à 3 dossiers, 10 mots de passe et 8 notes ») à la sortie de la 1.0.4.
-- Vérifier les installations et le nombre de testeurs inscrits (au moins 12), puis remplir le formulaire d'accès production.
+- Ne pas modifier les groupes de testeurs (risque de repartir de zéro), prévisualiser le questionnaire de production (3 parties : test fermé, appli, capacité à passer en production), puis remplir le formulaire d'accès production.
 - Vérifier sur un vrai téléphone : haptique, lancement sans flash blanc en mode clair, icône thématique.
 - Vérifier le remboursement de l'achat de test.
 - Backlog gardé en attente : écran vide au démarrage, PBKDF2 à 600 000 itérations, test grande police, e-mail professionnel (fiche Play, profil marchand, politique de confidentialité), statut juridique d'éditeur.
