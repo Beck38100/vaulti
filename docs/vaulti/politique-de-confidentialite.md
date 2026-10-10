@@ -1,6 +1,6 @@
 # Politique de confidentialité — Vaulti
 
-**Dernière mise à jour : 14 septembre 2026**
+**Dernière mise à jour : 10 octobre 2026**
 
 Vaulti est un gestionnaire de mots de passe qui fonctionne entièrement sur votre
 téléphone. Cette politique explique quelles données l'application manipule, où
@@ -15,7 +15,7 @@ l'application sert à traiter l'achat Premium optionnel, via Google Play.**
 ## 1. Qui est responsable de l'application
 
 Vaulti est publiée par un développeur indépendant.
-Contact : `qualf404@gmail.com`
+Contact : `hello.onyxlab@gmail.com`
 
 ## 2. Quelles données l'application manipule
 
@@ -161,4 +161,4 @@ l'application.
 ## 13. Contact
 
 Pour toute question relative à cette politique :
-`qualf404@gmail.com`
+`hello.onyxlab@gmail.com`
