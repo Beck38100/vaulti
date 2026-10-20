@@ -88,8 +88,8 @@ Future<VaultRecovery> askVaultRecovery(BuildContext context) async {
         shape: dialogShape,
         title: const Text('Coffre illisible'),
         content: Text(
-          'Ton coffre est enregistré sur ce téléphone, mais Vaulti n’arrive pas à le lire pour le moment. '
-          'Rien n’a été modifié ni effacé.\n\n'
+          'Vaulti n’arrive pas à lire ou à retrouver ton coffre sur ce téléphone. '
+          'Il n’écrit rien tant que tu n’as pas choisi.\n\n'
           'Tu peux réessayer, importer une sauvegarde chiffrée, ou repartir d’un coffre vide : '
           'le coffre illisible serait alors remplacé.',
           style: TextStyle(color: Colors.grey.shade400, fontSize: 13.5, height: 1.4),
