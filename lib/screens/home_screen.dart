@@ -625,7 +625,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _showMessage(isNote ? 'Note enregistrée' : 'Fiche enregistrée');
   }
 
+  /// Demande l'authentification et, si elle échoue, explique pourquoi.
+  Future<bool> _confirmIdentity(String reason) async {
+    final result = await _authenticate(reason);
+    if (!mounted) return false;
+    if (!result.granted && result.message != null) _showMessage(result.message!, isWarning: true);
+    return result.granted;
+  }
+
   Future<void> _editEntry(VaultEntry entry) async {
+    // Le formulaire affiche le contenu en clair (mot de passe actuel, corps d'une
+    // note) : même exigence que pour le révéler dans la liste, ou le copier.
+    final confirmed = await _confirmIdentity(
+      entry.isNote ? 'Authentifie-toi pour modifier cette note' : 'Authentifie-toi pour modifier cette fiche',
+    );
+    if (!confirmed || !mounted) return;
     final draft = entry.isNote
         ? await showNoteForm(
             context,
