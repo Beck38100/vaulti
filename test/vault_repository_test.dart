@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vaulti/dialogs.dart';
 import 'package:vaulti/models.dart';
+import 'package:vaulti/vault_marker.dart';
 import 'package:vaulti/vault_repository.dart';
 
 import 'helpers.dart';
@@ -14,10 +17,18 @@ class _FailingStorage extends Fake implements FlutterSecureStorage {
   dynamic noSuchMethod(Invocation invocation) => Future<String?>.error(PlatformException(code: 'keystore'));
 }
 
+/// Repère dans un dossier temporaire : les tests ne touchent jamais au vrai
+/// dossier de l'application.
+VaultMarker tempMarker() {
+  final dir = Directory.systemTemp.createTempSync('vaulti-repere-test');
+  addTearDown(() => dir.deleteSync(recursive: true));
+  return VaultMarker(() async => dir);
+}
+
 /// Place [raw] sous la clé du coffre, puis tente de le lire.
 Future<VaultData> loadFrom(Map<String, String> stored) {
   FlutterSecureStorage.setMockInitialValues(stored);
-  return const VaultRepository().loadVault();
+  return VaultRepository(const FlutterSecureStorage(), tempMarker()).loadVault();
 }
 
 void main() {
@@ -30,7 +41,7 @@ void main() {
 
     test('un coffre valide se relit tel qu’il a été enregistré', () async {
       FlutterSecureStorage.setMockInitialValues({});
-      const repository = VaultRepository();
+      final repository = VaultRepository(const FlutterSecureStorage(), tempMarker());
       await repository.saveVault(VaultData(
         folders: [VaultFolder(id: 'f1', title: 'Banque')],
         entries: [],
@@ -64,13 +75,16 @@ void main() {
     });
 
     test('une erreur de lecture du stockage est signalée', () async {
-      await expectLater(VaultRepository(_FailingStorage()).loadVault(), throwsA(isA<VaultUnreadableException>()));
+      await expectLater(
+        VaultRepository(_FailingStorage(), tempMarker()).loadVault(),
+        throwsA(isA<VaultUnreadableException>()),
+      );
     });
 
     test('lire un coffre illisible ne modifie pas la donnée enregistrée', () async {
       const corrupted = '{ceci n’est pas du json';
       FlutterSecureStorage.setMockInitialValues({'vault_data': corrupted});
-      const repository = VaultRepository();
+      final repository = VaultRepository(const FlutterSecureStorage(), tempMarker());
 
       await expectLater(repository.loadVault(), throwsA(isA<VaultUnreadableException>()));
 
@@ -92,7 +106,7 @@ void main() {
     testWidgets('annonce que rien n’a été effacé et propose les trois choix', (tester) async {
       await open(tester);
 
-      expect(find.textContaining('Rien n’a été modifié ni effacé'), findsOneWidget);
+      expect(find.textContaining('n’écrit rien tant que tu n’as pas choisi'), findsOneWidget);
       expect(find.text('Réessayer'), findsOneWidget);
       expect(find.text('Importer une sauvegarde'), findsOneWidget);
       expect(find.text('Repartir d’un coffre vide'), findsOneWidget);

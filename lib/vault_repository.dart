@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'models.dart';
+import 'vault_marker.dart';
 
 /// Le coffre enregistré existe, mais n'a pas pu être lu (stockage en erreur ou
 /// contenu illisible). Distinct d'un coffre vide : l'appelant ne doit jamais
@@ -16,9 +17,13 @@ class VaultUnreadableException implements Exception {
 
 /// Accès au stockage sécurisé de l'appareil (chiffré par le système).
 class VaultRepository {
-  const VaultRepository([this._storage = const FlutterSecureStorage()]);
+  const VaultRepository([
+    this._storage = const FlutterSecureStorage(),
+    this._marker = const VaultMarker(),
+  ]);
 
   final FlutterSecureStorage _storage;
+  final VaultMarker _marker;
 
   static const _vaultKey = 'vault_data';
   static const _legacyVaultKey = 'vault_passwords';
@@ -40,19 +45,34 @@ class VaultRepository {
     } catch (_) {
       throw const VaultUnreadableException();
     }
-    if (raw == null || raw.isEmpty) return VaultData.empty();
+    if (raw == null || raw.isEmpty) {
+      // Aucun coffre dans le stockage sécurisé : premier lancement, sauf si un
+      // coffre y a déjà été enregistré (repère présent). Il a alors disparu sans
+      // que l'utilisateur l'ait décidé.
+      if (await _marker.exists()) throw const VaultUnreadableException();
+      return VaultData.empty();
+    }
+    final VaultData data;
     try {
       final decoded = jsonDecode(raw);
       if (decoded is! List && decoded is! Map) throw const FormatException();
-      return VaultData.fromDecoded(decoded);
+      data = VaultData.fromDecoded(decoded);
     } catch (_) {
       // FormatException, mais aussi TypeError sur une fiche mal formée.
       throw const VaultUnreadableException();
     }
+    // Un coffre lu avec succès pose aussi le repère : ceux qui avaient déjà un
+    // coffre avant cette protection en profitent dès la première ouverture, sans
+    // attendre leur prochain enregistrement.
+    await _marker.mark();
+    return data;
   }
 
-  Future<void> saveVault(VaultData data) {
-    return _storage.write(key: _vaultKey, value: jsonEncode(data.toJson()));
+  Future<void> saveVault(VaultData data) async {
+    await _storage.write(key: _vaultKey, value: jsonEncode(data.toJson()));
+    // Après l'écriture réussie seulement : un repère sans coffre déclencherait
+    // une fausse alerte.
+    await _marker.mark();
   }
 
   Future<String?> readUserName() async {
