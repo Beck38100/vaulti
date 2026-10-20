@@ -155,13 +155,14 @@ class VaultSession {
         onDelete: () => onDeleteFolder(folder),
       );
 
-  /// Filtre les fiches par titre et identifiant, insensible à la casse.
+  /// Filtre les fiches par titre et identifiant (titre seul pour une note), insensible à la casse.
   static List<VaultEntry> search(List<VaultEntry> source, String query) {
     final needle = query.trim().toLowerCase();
     if (needle.isEmpty) return source;
-    return source
-        .where((entry) => '${entry.title} ${entry.identifier}'.toLowerCase().contains(needle))
-        .toList();
+    return source.where((entry) {
+      final searchable = entry.isNote ? entry.title : '${entry.title} ${entry.identifier}';
+      return searchable.toLowerCase().contains(needle);
+    }).toList();
   }
 
   /// Filtre les dossiers par nom, insensible à la casse.
