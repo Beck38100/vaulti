@@ -71,6 +71,56 @@ Future<String?> askUserName(
   ).whenComplete(() => disposeAfterFrame([controller]));
 }
 
+/// Ce que l'utilisateur décide quand le coffre enregistré est illisible.
+enum VaultRecovery { retry, restoreBackup, startEmpty }
+
+/// Annonce que le coffre n'a pas pu être lu et laisse l'utilisateur décider.
+/// La fenêtre ne se ferme pas sans réponse : tant qu'il n'a pas choisi, rien
+/// n'est écrit par-dessus le coffre existant.
+Future<VaultRecovery> askVaultRecovery(BuildContext context) async {
+  final choice = await showDialog<VaultRecovery>(
+    context: context,
+    barrierDismissible: false,
+    builder: (ctx) => PopScope(
+      canPop: false,
+      child: AlertDialog(
+        backgroundColor: AppColors.shell,
+        shape: dialogShape,
+        title: const Text('Coffre illisible'),
+        content: Text(
+          'Ton coffre est enregistré sur ce téléphone, mais Vaulti n’arrive pas à le lire pour le moment. '
+          'Rien n’a été modifié ni effacé.\n\n'
+          'Tu peux réessayer, importer une sauvegarde chiffrée, ou repartir d’un coffre vide : '
+          'le coffre illisible serait alors remplacé.',
+          style: TextStyle(color: Colors.grey.shade400, fontSize: 13.5, height: 1.4),
+        ),
+        actionsOverflowDirection: VerticalDirection.down,
+        actions: [
+          TextButton(
+            onPressed: () => closeDialog(ctx, VaultRecovery.startEmpty),
+            child: Text('Repartir d’un coffre vide', style: TextStyle(color: Colors.grey.shade400)),
+          ),
+          TextButton(
+            onPressed: () => closeDialog(ctx, VaultRecovery.restoreBackup),
+            child: const Text('Importer une sauvegarde'),
+          ),
+          FilledButton(
+            onPressed: () => closeDialog(ctx, VaultRecovery.retry),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.signature,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            ),
+            child: const Text('Réessayer'),
+          ),
+        ],
+      ),
+    ),
+  );
+  // Sans réponse (ne devrait pas arriver), on réessaie : le choix le moins destructeur.
+  return choice ?? VaultRecovery.retry;
+}
+
 /// Confirmation avant une suppression.
 Future<bool> confirmDelete(
   BuildContext context, {

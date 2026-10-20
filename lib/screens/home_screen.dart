@@ -59,6 +59,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   AutoLockDelay _autoLockDelay = AutoLockDelay.defaultDelay;
   bool _screenProtection = true;
 
+  /// Vrai tant que le coffre enregistré n'a pas pu être lu : plus rien n'est
+  /// écrit par-dessus, pour ne pas effacer ce qu'on a seulement échoué à lire.
+  bool _vaultUnreadable = false;
+
   /// Clé de sauvegarde en mémoire ; absente tant qu'aucune phrase secrète
   /// n'a été choisie, ou sur un appareil neuf avant restauration.
   SecretKey? _backupKey;
@@ -198,6 +202,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           _entries = restored.data.entries;
           _backupKey = restored.key;
           _backupSalt = restored.salt;
+          _vaultUnreadable = false;
         });
         await _repository.saveVault(restored.data);
         await _repository.saveBackupKey(await restored.key.extractBytes(), restored.salt);
@@ -358,13 +363,48 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   // --- Chargement et sauvegarde ------------------------------------------
 
+  /// Charge le coffre. S'il existe mais reste illisible, on ne le remplace jamais
+  /// de soi-même : l'utilisateur choisit de réessayer, d'importer une sauvegarde
+  /// ou de repartir d'un coffre vide, et rien n'est écrit tant qu'il n'a pas choisi.
   Future<void> _loadVault() async {
-    final data = await _repository.loadVault();
-    if (!mounted) return;
-    setState(() {
-      _folders = data.folders;
-      _entries = data.entries;
-    });
+    while (mounted) {
+      try {
+        final data = await _repository.loadVault();
+        if (!mounted) return;
+        setState(() {
+          _folders = data.folders;
+          _entries = data.entries;
+          _vaultUnreadable = false;
+        });
+        return;
+      } on VaultUnreadableException {
+        if (!mounted) return;
+        _vaultUnreadable = true;
+        final choice = await askVaultRecovery(context);
+        if (!mounted) return;
+        switch (choice) {
+          case VaultRecovery.retry:
+            break;
+          case VaultRecovery.restoreBackup:
+            await _importBackup();
+            if (!_vaultUnreadable) return;
+          case VaultRecovery.startEmpty:
+            final confirmed = await confirmDelete(
+              context,
+              title: 'Repartir d’un coffre vide ?',
+              message: 'Le coffre illisible sera remplacé par un coffre vide. Cette action est définitive.',
+            );
+            if (!confirmed || !mounted) break;
+            setState(() {
+              _folders = [];
+              _entries = [];
+              _vaultUnreadable = false;
+            });
+            await _save();
+            return;
+        }
+      }
+    }
   }
 
   Future<void> _loadUserName() async {
@@ -446,6 +486,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _save() async {
+    if (_vaultUnreadable) return; // ne jamais écrire par-dessus un coffre qu'on n'a pas pu lire
     final data = VaultData(folders: _folders, entries: _entries);
     await _repository.saveVault(data);
     await _refreshBackup(data);

@@ -4,6 +4,16 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'models.dart';
 
+/// Le coffre enregistré existe, mais n'a pas pu être lu (stockage en erreur ou
+/// contenu illisible). Distinct d'un coffre vide : l'appelant ne doit jamais
+/// écrire par-dessus sans que l'utilisateur l'ait décidé.
+class VaultUnreadableException implements Exception {
+  const VaultUnreadableException();
+
+  @override
+  String toString() => 'Coffre illisible';
+}
+
 /// Accès au stockage sécurisé de l'appareil (chiffré par le système).
 class VaultRepository {
   const VaultRepository([this._storage = const FlutterSecureStorage()]);
@@ -19,14 +29,25 @@ class VaultRepository {
   static const _backupSaltKey = 'backup_salt';
   static const _isPremiumKey = 'is_premium';
 
+  /// Lit le coffre. Un coffre absent (premier lancement) donne un coffre vide ;
+  /// un coffre présent mais illisible lève [VaultUnreadableException], sans rien
+  /// modifier : renvoyer un coffre vide ici ferait écraser la donnée existante
+  /// à la prochaine sauvegarde.
   Future<VaultData> loadVault() async {
-    final raw = await _storage.read(key: _vaultKey) ?? await _storage.read(key: _legacyVaultKey);
+    final String? raw;
+    try {
+      raw = await _storage.read(key: _vaultKey) ?? await _storage.read(key: _legacyVaultKey);
+    } catch (_) {
+      throw const VaultUnreadableException();
+    }
     if (raw == null || raw.isEmpty) return VaultData.empty();
     try {
-      return VaultData.fromDecoded(jsonDecode(raw));
-    } on FormatException {
-      // Coffre illisible : on repart d'un coffre vide plutôt que de planter.
-      return VaultData.empty();
+      final decoded = jsonDecode(raw);
+      if (decoded is! List && decoded is! Map) throw const FormatException();
+      return VaultData.fromDecoded(decoded);
+    } catch (_) {
+      // FormatException, mais aussi TypeError sur une fiche mal formée.
+      throw const VaultUnreadableException();
     }
   }
 
