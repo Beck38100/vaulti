@@ -1,6 +1,6 @@
 # Politique de confidentialité — Vaulti
 
-**Dernière mise à jour : 10 octobre 2026**
+**Dernière mise à jour : 24 octobre 2026**
 
 Vaulti est un gestionnaire de mots de passe qui fonctionne entièrement sur votre
 téléphone. Cette politique explique quelles données l'application manipule, où
@@ -47,9 +47,10 @@ Vaulti propose une sauvegarde destinée à retrouver votre coffre si vous perdez
 ou changez de téléphone. Son fonctionnement :
 
 1. Vous choisissez un **mot de passe de sauvegarde**, connu de vous seul.
-2. Une clé de chiffrement en est dérivée (PBKDF2-HMAC-SHA256, 120 000
-   itérations), puis le contenu de votre coffre est chiffré avec cette clé
-   (AES-256-GCM).
+2. Une clé de chiffrement en est dérivée (PBKDF2-HMAC-SHA256, 600 000
+   itérations pour les sauvegardes créées avec la version 1.0.5 ou plus
+   récente ; 120 000 auparavant), puis le contenu de votre coffre est chiffré
+   avec cette clé (AES-256-GCM).
 3. Le fichier obtenu est **illisible sans votre mot de passe de sauvegarde**.
 
 Ce fichier chiffré est repris par la **sauvegarde automatique d'Android**, une

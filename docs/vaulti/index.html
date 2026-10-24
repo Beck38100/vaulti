@@ -45,7 +45,7 @@
 <main>
 <header>
   <h1>Politique de confidentialité — Vaulti</h1>
-  <p class="date">Dernière mise à jour : 10 octobre 2026</p>
+  <p class="date">Dernière mise à jour : 24 octobre 2026</p>
 </header>
 
 <p>Vaulti est un gestionnaire de mots de passe qui fonctionne entièrement sur votre
@@ -87,8 +87,10 @@ Play Facturation (voir section 7) — aucune autre fonction n'y a recours.</p>
 changez de téléphone. Son fonctionnement :</p>
 <ol>
   <li>Vous choisissez un <strong>mot de passe de sauvegarde</strong>, connu de vous seul.</li>
-  <li>Une clé de chiffrement en est dérivée (PBKDF2-HMAC-SHA256, 120 000 itérations),
-      puis le contenu de votre coffre est chiffré avec cette clé (AES-256-GCM).</li>
+  <li>Une clé de chiffrement en est dérivée (PBKDF2-HMAC-SHA256, 600 000 itérations
+      pour les sauvegardes créées avec la version 1.0.5 ou plus récente ; 120 000
+      auparavant), puis le contenu de votre coffre est chiffré avec cette clé
+      (AES-256-GCM).</li>
   <li>Le fichier obtenu est <strong>illisible sans votre mot de passe de sauvegarde</strong>.</li>
 </ol>
 <p>Ce fichier chiffré est repris par la <strong>sauvegarde automatique d'Android</strong>,
