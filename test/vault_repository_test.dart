@@ -92,6 +92,37 @@ void main() {
     });
   });
 
+  group('clé de sauvegarde et itérations', () {
+    test('une clé enregistrée sans valeur d’itérations (ancienne version) vaut 120 000', () async {
+      FlutterSecureStorage.setMockInitialValues({'backup_key': 'AAEC', 'backup_salt': 'AwQF'});
+
+      final stored = await VaultRepository(const FlutterSecureStorage(), tempMarker()).readBackupKey();
+
+      expect(stored!.iterations, 120000);
+    });
+
+    test('la valeur enregistrée avec la clé se relit', () async {
+      FlutterSecureStorage.setMockInitialValues({});
+      final repository = VaultRepository(const FlutterSecureStorage(), tempMarker());
+
+      await repository.saveBackupKey([1, 2, 3], [4, 5, 6], 300000);
+
+      expect((await repository.readBackupKey())!.iterations, 300000);
+    });
+
+    test('une valeur enregistrée hors bornes est ignorée au profit de 120 000', () async {
+      FlutterSecureStorage.setMockInitialValues({
+        'backup_key': 'AAEC',
+        'backup_salt': 'AwQF',
+        'backup_iterations': '5',
+      });
+
+      final stored = await VaultRepository(const FlutterSecureStorage(), tempMarker()).readBackupKey();
+
+      expect(stored!.iterations, 120000);
+    });
+  });
+
   group('fenêtre « coffre illisible »', () {
     Future<Future<VaultRecovery>> open(WidgetTester tester) async {
       late Future<VaultRecovery> result;

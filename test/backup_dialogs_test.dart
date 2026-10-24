@@ -58,6 +58,52 @@ void main() {
     expect(result, 'Xk9#mP2vLq!z');
   });
 
+  testWidgets('un mot de passe de moins de 12 caractères est refusé, même moyen', (tester) async {
+    String? result = 'inchangé';
+    await openDialog(tester, (future) => future.then((value) => result = value));
+
+    // 8 lettres : « Moyen » pour la jauge, donc pas « trop faible », mais trop court.
+    await fill(tester, 'zxcvbnmk', 'zxcvbnmk');
+    await tester.tap(find.text('Enregistrer'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Au moins 12 caractères pour protéger une sauvegarde.'), findsOneWidget);
+    expect(result, 'inchangé');
+  });
+
+  testWidgets('11 caractères sont refusés, 12 sont acceptés', (tester) async {
+    String? result = 'inchangé';
+    await openDialog(tester, (future) => future.then((value) => result = value));
+
+    await fill(tester, 'Xk9#mP2vLq!', 'Xk9#mP2vLq!'); // 11
+    await tester.tap(find.text('Enregistrer'));
+    await tester.pumpAndSettle();
+    expect(find.text('Au moins 12 caractères pour protéger une sauvegarde.'), findsOneWidget);
+    expect(result, 'inchangé');
+
+    await fill(tester, 'Xk9#mP2vLq!z', 'Xk9#mP2vLq!z'); // 12
+    await tester.tap(find.text('Enregistrer'));
+    await tester.pumpAndSettle();
+    expect(result, 'Xk9#mP2vLq!z');
+  });
+
+  testWidgets('une phrase de passe longue en minuscules est acceptée', (tester) async {
+    String? result;
+    await openDialog(tester, (future) => future.then((value) => result = value));
+
+    await fill(tester, 'quatre mots tres longs', 'quatre mots tres longs');
+    await tester.tap(find.text('Enregistrer'));
+    await tester.pumpAndSettle();
+
+    expect(result, 'quatre mots tres longs');
+  });
+
+  testWidgets('le champ annonce la longueur minimale', (tester) async {
+    await openDialog(tester, (_) {});
+
+    expect(find.text('Au moins 12 caractères'), findsOneWidget);
+  });
+
   testWidgets('une confirmation différente est refusée', (tester) async {
     await openDialog(tester, (_) {});
 

@@ -30,10 +30,27 @@ class BackupCrypto {
   const BackupCrypto();
 
   /// Version du format, pour rester capable de relire d'anciennes sauvegardes.
-  static const formatVersion = 1;
+  /// Version 2 : le nombre d'itérations est lu dans l'en-tête (il était fixe en
+  /// version 1, et vaut alors [legacyIterations]).
+  static const formatVersion = 2;
 
-  /// Compromis usuel entre robustesse et temps de calcul sur un téléphone.
-  static const iterations = 120000;
+  /// Itérations de toutes les sauvegardes de version 1.
+  static const legacyIterations = 120000;
+
+  /// Itérations des nouvelles clés : 600 000, la valeur actuellement recommandée
+  /// pour PBKDF2-HMAC-SHA256. Mesuré le 2026-10-24 sur un téléphone : environ 2 s
+  /// par dérivation, sans arrêt perceptible de l'interface.
+  static const defaultIterations = 600000;
+
+  /// Bornes acceptées à la lecture d'une enveloppe : jamais moins que l'ancien
+  /// format, et un plafond pour qu'un fichier ne puisse pas imposer un calcul sans fin.
+  static const minIterations = 100000;
+  static const maxIterations = 2000000;
+
+  /// Longueur minimale du mot de passe qui protège une sauvegarde : le fichier
+  /// peut être attaqué hors ligne, sans limite d'essais, et chaque caractère de
+  /// plus multiplie le coût de l'attaque.
+  static const minPassphraseLength = 12;
 
   static const _keyLengthBytes = 32;
   static const _saltLengthBytes = 16;
@@ -45,7 +62,8 @@ class BackupCrypto {
   ///
   /// L'opération est volontairement lente : c'est ce qui rend une attaque par
   /// essais successifs coûteuse.
-  Future<SecretKey> deriveKey(String passphrase, List<int> salt) {
+  Future<SecretKey> deriveKey(String passphrase, List<int> salt, {int iterations = defaultIterations}) {
+    _checkIterationsInRange(iterations);
     final kdf = Pbkdf2(
       macAlgorithm: Hmac.sha256(),
       iterations: iterations,
@@ -57,7 +75,15 @@ class BackupCrypto {
   List<int> newSalt() => _randomBytes(_saltLengthBytes);
 
   /// Chiffre [plainText] et renvoie l'enveloppe JSON à écrire dans un fichier.
-  Future<String> encrypt({required String plainText, required SecretKey key, required List<int> salt}) async {
+  /// [iterations] est le nombre qui a servi à dériver [key] : il est écrit dans
+  /// l'en-tête pour que la clé puisse être retrouvée à partir du fichier.
+  Future<String> encrypt({
+    required String plainText,
+    required SecretKey key,
+    required List<int> salt,
+    int iterations = defaultIterations,
+  }) async {
+    _checkIterationsInRange(iterations);
     final nonce = _randomBytes(_nonceLengthBytes);
     final box = await _cipher.encrypt(
       utf8.encode(plainText),
@@ -89,6 +115,26 @@ class BackupCrypto {
       throw const BackupDecryptException('Ce fichier n’est pas une sauvegarde Vaulti.');
     }
     return base64Decode(salt);
+  }
+
+  /// Nombre d'itérations à utiliser pour dériver la clé de cette enveloppe.
+  /// Version 1 : valeur fixe, l'en-tête n'est pas consulté. Version 2 : valeur de
+  /// l'en-tête, refusée hors des bornes.
+  int iterationsOf(String envelope) {
+    final header = _parse(envelope);
+    _checkVersion(header);
+    if (header['version'] == 1) return legacyIterations;
+    final iterations = header['iterations'];
+    if (iterations is! int || iterations < minIterations || iterations > maxIterations) {
+      throw const BackupDecryptException('Cette sauvegarde utilise des paramètres que Vaulti ne prend pas en charge.');
+    }
+    return iterations;
+  }
+
+  static void _checkIterationsInRange(int iterations) {
+    if (iterations < minIterations || iterations > maxIterations) {
+      throw ArgumentError.value(iterations, 'iterations', 'hors des bornes autorisées');
+    }
   }
 
   /// Déchiffre une enveloppe. Lève [BackupDecryptException] si la phrase est

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'backup_crypto.dart';
 import 'models.dart';
 import 'vault_marker.dart';
 
@@ -32,6 +33,7 @@ class VaultRepository {
   static const _screenProtectionKey = 'screen_protection';
   static const _backupKeyKey = 'backup_key';
   static const _backupSaltKey = 'backup_salt';
+  static const _backupIterationsKey = 'backup_iterations';
   static const _isPremiumKey = 'is_premium';
 
   /// Lit le coffre. Un coffre absent (premier lancement) donne un coffre vide ;
@@ -112,20 +114,28 @@ class VaultRepository {
   /// sauvegarde à chaque modification sans redemander la phrase, tout en
   /// restant protégé par le magasin de clés du téléphone. Sur un nouvel
   /// appareil ce stockage est vide, et la phrase redevient indispensable.
-  Future<({List<int> key, List<int> salt})?> readBackupKey() async {
+  ///
+  /// Le nombre d'itérations qui a produit la clé est conservé avec elle. Les clés
+  /// enregistrées avant cette valeur datent de l'ancien format : 120 000.
+  Future<({List<int> key, List<int> salt, int iterations})?> readBackupKey() async {
     final key = await _storage.read(key: _backupKeyKey);
     final salt = await _storage.read(key: _backupSaltKey);
     if (key == null || salt == null) return null;
+    final stored = int.tryParse(await _storage.read(key: _backupIterationsKey) ?? '');
+    final iterations = stored != null && stored >= BackupCrypto.minIterations && stored <= BackupCrypto.maxIterations
+        ? stored
+        : BackupCrypto.legacyIterations;
     try {
-      return (key: base64Decode(key), salt: base64Decode(salt));
+      return (key: base64Decode(key), salt: base64Decode(salt), iterations: iterations);
     } on FormatException {
       return null;
     }
   }
 
-  Future<void> saveBackupKey(List<int> key, List<int> salt) async {
+  Future<void> saveBackupKey(List<int> key, List<int> salt, int iterations) async {
     await _storage.write(key: _backupKeyKey, value: base64Encode(key));
     await _storage.write(key: _backupSaltKey, value: base64Encode(salt));
+    await _storage.write(key: _backupIterationsKey, value: iterations.toString());
   }
 
   /// Statut Premium (achat unique). Sans vérification serveur : comme la
