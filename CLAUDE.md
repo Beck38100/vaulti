@@ -72,7 +72,7 @@ Widget tests use `wrap()` and `fakeSession()` from `test/helpers.dart`.
 - `VaultData.fromDecoded` also accepts the old format, where the vault was a bare list.
 
 **Backups** (`backup_crypto.dart` and `backup_service.dart`):
-- The file is a JSON envelope `{version, kdf, iterations, salt, nonce, data, mac}`, encrypted with PBKDF2-HMAC-SHA256 (120 000 iterations) and AES-256-GCM.
+- The file is a JSON envelope `{version, kdf, iterations, salt, nonce, data, mac}`, encrypted with PBKDF2-HMAC-SHA256 and AES-256-GCM. Format version 2 (1.0.5 and later) reads the iteration count from the header, within 100 000 to 2 000 000, and uses 600 000 for new keys; version 1 files always use a fixed 120 000 and stay readable.
 - Keep `formatVersion` backward compatible.
 - The file name `vaulti-sauvegarde.vaulti` is hard-coded in `android/app/src/main/res/xml/backup_rules.xml` and `data_extraction_rules.xml`. It must stay in sync with `BackupService.fileName`.
 - Importing a backup **replaces** the whole vault and also adopts that file's passphrase as the backup passphrase.
