@@ -30,11 +30,12 @@ class BackupService {
   }
 
   /// Écrit la sauvegarde chiffrée. Appelée à chaque modification du coffre.
-  Future<void> write(VaultData data, SecretKey key, List<int> salt) async {
+  Future<void> write(VaultData data, SecretKey key, List<int> salt, int iterations) async {
     final envelope = await _crypto.encrypt(
       plainText: jsonEncode(data.toJson()),
       key: key,
       salt: salt,
+      iterations: iterations,
     );
     final file = await _backupFile();
     await file.writeAsString(envelope, flush: true);
@@ -50,25 +51,28 @@ class BackupService {
 
   /// Déchiffre une enveloppe avec une phrase secrète.
   ///
-  /// Renvoie le coffre restauré et la clé dérivée, que l'appelant conserve
-  /// pour les sauvegardes suivantes sans redemander la phrase.
-  Future<({VaultData data, SecretKey key, List<int> salt})> restore(
+  /// Renvoie le coffre restauré, la clé dérivée et le nombre d'itérations qui
+  /// l'a produite : l'appelant les conserve ensemble pour les sauvegardes
+  /// suivantes sans redemander la phrase.
+  Future<({VaultData data, SecretKey key, List<int> salt, int iterations})> restore(
     String envelope,
     String passphrase,
   ) async {
     final salt = _crypto.saltOf(envelope);
-    final key = await _crypto.deriveKey(passphrase, salt);
+    final iterations = _crypto.iterationsOf(envelope);
+    final key = await _crypto.deriveKey(passphrase, salt, iterations: iterations);
     final clear = await _crypto.decrypt(envelope: envelope, key: key);
 
     final decoded = jsonDecode(clear);
-    return (data: VaultData.fromDecoded(decoded), key: key, salt: salt);
+    return (data: VaultData.fromDecoded(decoded), key: key, salt: salt, iterations: iterations);
   }
 
   /// Prépare une nouvelle protection à partir d'une phrase secrète choisie.
-  Future<({SecretKey key, List<int> salt})> prepareKey(String passphrase) async {
+  Future<({SecretKey key, List<int> salt, int iterations})> prepareKey(String passphrase) async {
     final salt = _crypto.newSalt();
-    final key = await _crypto.deriveKey(passphrase, salt);
-    return (key: key, salt: salt);
+    const iterations = BackupCrypto.defaultIterations;
+    final key = await _crypto.deriveKey(passphrase, salt, iterations: iterations);
+    return (key: key, salt: salt, iterations: iterations);
   }
 
   /// Nom proposé lors d'un export manuel, daté pour s'y retrouver.

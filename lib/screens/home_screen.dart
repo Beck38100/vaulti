@@ -68,6 +68,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   SecretKey? _backupKey;
   List<int>? _backupSalt;
 
+  /// Itérations qui ont produit [_backupKey] : écrites dans chaque sauvegarde.
+  int _backupIterations = BackupCrypto.legacyIterations;
+
   /// Instant où l'application est passée en arrière-plan.
   DateTime? _leftAt;
 
@@ -202,10 +205,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           _entries = restored.data.entries;
           _backupKey = restored.key;
           _backupSalt = restored.salt;
+          _backupIterations = restored.iterations;
           _vaultUnreadable = false;
         });
         await _repository.saveVault(restored.data);
-        await _repository.saveBackupKey(await restored.key.extractBytes(), restored.salt);
+        await _repository.saveBackupKey(await restored.key.extractBytes(), restored.salt, restored.iterations);
         if (!mounted) return true;
         _showMessage('Coffre restauré : ${restored.data.entries.length} fiche(s)');
         return true;
@@ -234,8 +238,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     setState(() {
       _backupKey = prepared.key;
       _backupSalt = prepared.salt;
+      _backupIterations = prepared.iterations;
     });
-    await _repository.saveBackupKey(await prepared.key.extractBytes(), prepared.salt);
+    await _repository.saveBackupKey(await prepared.key.extractBytes(), prepared.salt, prepared.iterations);
     await _refreshBackup(VaultData(folders: _folders, entries: _entries));
     if (!mounted) return;
     _showMessage(isChange ? 'Mot de passe de sauvegarde modifié.' : 'Sauvegarde protégée. Note bien ton mot de passe.');
@@ -499,7 +504,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final salt = _backupSalt;
     if (key == null || salt == null) return;
     try {
-      await _backup.write(data, key, salt);
+      await _backup.write(data, key, salt, _backupIterations);
     } catch (_) {
       // Un échec d'écriture ne doit jamais empêcher d'enregistrer le coffre
       // lui-même, qui reste la source de vérité sur l'appareil.
@@ -517,6 +522,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     setState(() {
       _backupKey = SecretKey(stored.key);
       _backupSalt = stored.salt;
+      _backupIterations = stored.iterations;
     });
   }
 

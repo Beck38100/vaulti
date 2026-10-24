@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../backup_crypto.dart';
 import '../password_strength.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
@@ -28,6 +29,12 @@ Future<String?> askNewPassphrase(BuildContext context, {bool isChange = false}) 
           final strength = evaluatePassword(value);
           if (strength.isWeak) {
             setDialogState(() => error = 'Trop faible pour protéger une sauvegarde. ${strength.hint}.');
+            return;
+          }
+          if (value.length < BackupCrypto.minPassphraseLength) {
+            setDialogState(
+              () => error = 'Au moins ${BackupCrypto.minPassphraseLength} caractères pour protéger une sauvegarde.',
+            );
             return;
           }
           if (value != secondCtrl.text) {
@@ -76,7 +83,7 @@ Future<String?> askNewPassphrase(BuildContext context, {bool isChange = false}) 
               controller: firstCtrl,
               autofocus: true,
               obscureText: !visible,
-              decoration: fieldDecoration('Au moins 8 caractères', accent: AppColors.security)
+              decoration: fieldDecoration('Au moins ${BackupCrypto.minPassphraseLength} caractères', accent: AppColors.security)
                   .copyWith(
                 errorText: error,
                 suffixIcon: IconButton(

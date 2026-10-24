@@ -6,13 +6,19 @@ import 'package:vaulti/backup_crypto.dart';
 /// Chiffre un contenu et renvoie l'enveloppe, comme le fait l'application.
 Future<String> seal(BackupCrypto crypto, String clear, String passphrase) async {
   final salt = crypto.newSalt();
-  final key = await crypto.deriveKey(passphrase, salt);
-  return crypto.encrypt(plainText: clear, key: key, salt: salt);
+  // Itérations minimales : ces tests vérifient le chiffrement, pas le coût de la dérivation.
+  const iterations = BackupCrypto.minIterations;
+  final key = await crypto.deriveKey(passphrase, salt, iterations: iterations);
+  return crypto.encrypt(plainText: clear, key: key, salt: salt, iterations: iterations);
 }
 
 /// Tente de déchiffrer une enveloppe avec une phrase donnée.
 Future<String> open(BackupCrypto crypto, String envelope, String passphrase) async {
-  final key = await crypto.deriveKey(passphrase, crypto.saltOf(envelope));
+  final key = await crypto.deriveKey(
+    passphrase,
+    crypto.saltOf(envelope),
+    iterations: crypto.iterationsOf(envelope),
+  );
   return crypto.decrypt(envelope: envelope, key: key);
 }
 
