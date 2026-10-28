@@ -7,8 +7,9 @@ téléphone. Cette politique explique quelles données l'application manipule, o
 elles sont stockées, et qui peut y accéder.
 
 En résumé : **Vaulti ne collecte aucune donnée personnelle, ne contient aucune
-publicité, aucun outil de mesure d'audience. Le seul échange réseau de
-l'application sert à traiter l'achat Premium optionnel, via Google Play.**
+publicité, aucun outil de mesure d'audience. Le seul accès réseau déclaré par
+l'application provient de la bibliothèque Google Play Facturation, utilisée pour
+l'achat Premium optionnel.**
 
 ---
 
@@ -37,9 +38,11 @@ d'Android. Elles y sont chiffrées par une clé détenue par le magasin de clés
 système (Android Keystore), qui ne quitte jamais le téléphone, et ne sont
 accessibles qu'à Vaulti.
 
-**Vaulti n'envoie aucune donnée personnelle sur Internet.** Le seul accès
-réseau de l'application sert à traiter l'achat Premium optionnel via Google
-Play Facturation (voir section 7) — aucune autre fonction n'y a recours.
+**Vaulti n'envoie lui-même aucune donnée personnelle sur Internet** et
+n'intègre aucun outil de mesure d'audience. L'application déclare la
+permission d'accès au réseau parce que la bibliothèque Google Play Facturation
+l'exige, pour l'achat Premium optionnel (voir section 7). Aucune autre
+fonction de Vaulti n'y a recours.
 
 ## 4. La sauvegarde chiffrée
 
@@ -54,9 +57,10 @@ ou changez de téléphone. Son fonctionnement :
 3. Le fichier obtenu est **illisible sans votre mot de passe de sauvegarde**.
 
 Ce fichier chiffré est repris par la **sauvegarde automatique d'Android**, une
-fonction du système d'exploitation qui le dépose sur votre propre compte Google
-(Google Drive), comme pour les autres applications de votre téléphone. Ce
-transfert est réalisé par Android, pas par Vaulti.
+fonction du système d'exploitation qui le dépose sur votre compte Google,
+comme pour les autres applications de votre téléphone. Il peut aussi être
+repris lors d'un transfert d'un appareil à un autre. Ces transferts sont
+réalisés par Android, pas par Vaulti.
 
 Concrètement :
 
@@ -71,12 +75,14 @@ Concrètement :
   remplacer à votre insu, par erreur ou après avoir eu accès à votre
   téléphone déverrouillé.
 
-Vous pouvez désactiver cette sauvegarde à tout moment dans les réglages Android
-de votre téléphone (Système → Sauvegarde).
+Vous pouvez désactiver cette sauvegarde à tout moment dans les réglages de votre
+téléphone, rubrique Sauvegarde.
 
 Vous pouvez également exporter vous-même une copie chiffrée de votre coffre, à
-l'endroit de votre choix. Ce que vous faites ensuite de ce fichier relève de
-votre responsabilité.
+l'endroit de votre choix. Si vous l'enregistrez dans un service en ligne ou
+dans une autre application, ce service ou cette application détient ensuite le
+fichier, et Vaulti n'en garde aucun contrôle. Ce que vous faites ensuite de ce
+fichier relève de votre responsabilité.
 
 ## 5. Empreinte digitale et déverrouillage
 
@@ -89,7 +95,9 @@ uniquement une réponse « authentification réussie » ou « échouée ».
 
 Vaulti ne transmet vos données à aucun tiers, ne les vend pas, ne les utilise à
 aucune fin publicitaire ou statistique. L'application n'intègre aucun kit de
-développement tiers de mesure d'audience, de publicité ou de suivi.
+développement tiers de mesure d'audience, de publicité ou de suivi. Elle
+utilise la bibliothèque Google Play Facturation, fournie par Google (voir
+section 7).
 
 Le bouton « Donner mon avis » des réglages est le seul lien vers l'extérieur :
 il ouvre, dans votre navigateur, un formulaire Google Forms externe où vous
@@ -112,8 +120,11 @@ Vaulti conserve uniquement, sur votre appareil, une information technique
 indiquant si l'achat a été effectué (« Premium » ou non) — aucune autre donnée
 n'est associée à cet achat côté application.
 
-Cette fonctionnalité nécessite un accès réseau, uniquement au moment de l'achat
-ou de sa vérification.
+Cette fonctionnalité nécessite un accès réseau : l'application en déclare donc
+la permission. La bibliothèque Google Play Facturation, fournie par Google,
+peut échanger des données techniques avec Google. Cela relève de la politique
+de confidentialité de Google, indiquée plus haut. Vaulti n'y envoie aucune
+donnée personnelle.
 
 ## 8. Presse-papiers
 
@@ -135,7 +146,7 @@ comportement du système, indépendant de Vaulti.
 - **Tout le coffre** : désinstallez Vaulti, ou effacez les données de
   l'application dans les réglages Android. Tout est alors définitivement perdu.
 - **La sauvegarde en ligne** : supprimez-la depuis les réglages de sauvegarde de
-  votre compte Google (Google One → Sauvegardes → Données d'application).
+  votre compte Google.
 
 Aucune donnée n'étant détenue par le développeur, il n'y a pas de demande de
 suppression à lui adresser.
