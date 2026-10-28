@@ -1,6 +1,6 @@
 # Politique de confidentialité — Vaulti
 
-**Dernière mise à jour : 24 octobre 2026**
+**Dernière mise à jour : 28 octobre 2026**
 
 Vaulti est un gestionnaire de mots de passe qui fonctionne entièrement sur votre
 téléphone. Cette politique explique quelles données l'application manipule, où
