@@ -154,10 +154,13 @@ void main() {
   });
 
   group('fenêtre « coffre illisible »', () {
-    Future<Future<VaultRecovery>> open(WidgetTester tester) async {
+    Future<Future<VaultRecovery>> open(WidgetTester tester, {bool hasLocalBackup = false}) async {
       late Future<VaultRecovery> result;
       await tester.pumpWidget(wrap(Builder(builder: (context) {
-        return ElevatedButton(onPressed: () => result = askVaultRecovery(context), child: const Text('ouvrir'));
+        return ElevatedButton(
+          onPressed: () => result = askVaultRecovery(context, hasLocalBackup: hasLocalBackup),
+          child: const Text('ouvrir'),
+        );
       })));
       await tester.tap(find.text('ouvrir'));
       await tester.pumpAndSettle();
@@ -171,6 +174,26 @@ void main() {
       expect(find.text('Réessayer'), findsOneWidget);
       expect(find.text('Importer une sauvegarde'), findsOneWidget);
       expect(find.text('Repartir d’un coffre vide'), findsOneWidget);
+    });
+
+    testWidgets('sans sauvegarde sur le téléphone, la restauration interne n’est pas proposée', (tester) async {
+      await open(tester);
+
+      expect(find.text('Restaurer la sauvegarde de ce téléphone'), findsNothing);
+    });
+
+    testWidgets('avec une sauvegarde sur le téléphone, elle est proposée en plus de l’import', (tester) async {
+      final result = await open(tester, hasLocalBackup: true);
+
+      expect(find.text('Restaurer la sauvegarde de ce téléphone'), findsOneWidget);
+      expect(find.text('Importer une sauvegarde'), findsOneWidget);
+      expect(find.text('Réessayer'), findsOneWidget);
+      expect(find.text('Repartir d’un coffre vide'), findsOneWidget);
+
+      await tester.tap(find.text('Restaurer la sauvegarde de ce téléphone'));
+      await tester.pumpAndSettle();
+
+      expect(await result, VaultRecovery.restoreLocalBackup);
     });
 
     testWidgets('ne se ferme pas en touchant à côté', (tester) async {

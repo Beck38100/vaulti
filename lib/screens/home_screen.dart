@@ -385,30 +385,50 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       } on VaultUnreadableException {
         if (!mounted) return;
         _vaultUnreadable = true;
-        final choice = await askVaultRecovery(context);
+        final localBackup = await _readLocalBackup();
         if (!mounted) return;
-        switch (choice) {
-          case VaultRecovery.retry:
-            break;
-          case VaultRecovery.restoreBackup:
-            await _importBackup();
-            if (!_vaultUnreadable) return;
-          case VaultRecovery.startEmpty:
-            final confirmed = await confirmDelete(
-              context,
-              title: 'Repartir d’un coffre vide ?',
-              message: 'Le coffre illisible sera remplacé par un coffre vide. Cette action est définitive.',
-            );
-            if (!confirmed || !mounted) break;
-            setState(() {
-              _folders = [];
-              _entries = [];
-              _vaultUnreadable = false;
-            });
-            await _save();
-            return;
+        final choice = await askVaultRecovery(context, hasLocalBackup: localBackup != null);
+        if (!mounted) return;
+        try {
+          switch (choice) {
+            case VaultRecovery.retry:
+              break;
+            case VaultRecovery.restoreLocalBackup:
+              if (localBackup == null) break;
+              await _restoreFrom(localBackup, message: 'Saisis le mot de passe qui protège la sauvegarde de ce téléphone.');
+              if (!_vaultUnreadable) return;
+            case VaultRecovery.restoreBackup:
+              await _importBackup();
+              if (!_vaultUnreadable) return;
+            case VaultRecovery.startEmpty:
+              final confirmed = await confirmDelete(
+                context,
+                title: 'Repartir d’un coffre vide ?',
+                message: 'Le coffre illisible sera remplacé par un coffre vide. Cette action est définitive.',
+              );
+              if (!confirmed || !mounted) break;
+              setState(() {
+                _folders = [];
+                _entries = [];
+                _vaultUnreadable = false;
+              });
+              await _save();
+              return;
+          }
+        } catch (_) {
+          // Le stockage sécurisé refuse l'écriture : on revient à la fenêtre, rien n'est perdu.
+          if (mounted) _showMessage('Le stockage sécurisé du téléphone refuse l’écriture. Réessaie plus tard.', isWarning: true);
         }
       }
+    }
+  }
+
+  /// Sauvegarde chiffrée de ce téléphone, ou null s'il n'y en a pas (ou si elle est illisible).
+  Future<String?> _readLocalBackup() async {
+    try {
+      return await _backup.readEnvelope();
+    } catch (_) {
+      return null;
     }
   }
 
