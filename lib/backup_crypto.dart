@@ -62,7 +62,7 @@ class BackupCrypto {
   ///
   /// L'opération est volontairement lente : c'est ce qui rend une attaque par
   /// essais successifs coûteuse.
-  Future<SecretKey> deriveKey(String passphrase, List<int> salt, {int iterations = defaultIterations}) {
+  Future<SecretKey> deriveKey(String passphrase, List<int> salt, {required int iterations}) {
     _checkIterationsInRange(iterations);
     final kdf = Pbkdf2(
       macAlgorithm: Hmac.sha256(),
@@ -81,7 +81,7 @@ class BackupCrypto {
     required String plainText,
     required SecretKey key,
     required List<int> salt,
-    int iterations = defaultIterations,
+    required int iterations,
   }) async {
     _checkIterationsInRange(iterations);
     final nonce = _randomBytes(_nonceLengthBytes);
