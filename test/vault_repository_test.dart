@@ -92,6 +92,36 @@ void main() {
     });
   });
 
+  group('lectures de réglages quand le magasin de clés échoue', () {
+    test('aucune ne lève d’exception : valeurs prudentes, l’appli démarre', () async {
+      final repository = VaultRepository(_FailingStorage(), tempMarker());
+
+      expect(await repository.readAutoLockDelay(), AutoLockDelay.fromSeconds(null));
+      expect(await repository.readScreenProtection(), isTrue);
+      expect(await repository.readIsPremium(), isFalse);
+      expect(await repository.readBackupKey(), isNull);
+    });
+
+    test('la protection d’écran reste active par défaut, même en erreur', () async {
+      expect(await VaultRepository(_FailingStorage(), tempMarker()).readScreenProtection(), isTrue);
+    });
+
+    test('une valeur mal encodée pour la clé de sauvegarde donne « aucune clé »', () async {
+      FlutterSecureStorage.setMockInitialValues({'backup_key': '***', 'backup_salt': '***'});
+
+      expect(await VaultRepository(const FlutterSecureStorage(), tempMarker()).readBackupKey(), isNull);
+    });
+
+    test('un stockage qui répond normalement donne toujours les vraies valeurs', () async {
+      FlutterSecureStorage.setMockInitialValues({'is_premium': 'on', 'screen_protection': 'off', 'auto_lock_seconds': '300'});
+      final repository = VaultRepository(const FlutterSecureStorage(), tempMarker());
+
+      expect(await repository.readIsPremium(), isTrue);
+      expect(await repository.readScreenProtection(), isFalse);
+      expect((await repository.readAutoLockDelay()).seconds, 300);
+    });
+  });
+
   group('clé de sauvegarde et itérations', () {
     test('une clé enregistrée sans valeur d’itérations (ancienne version) vaut 120 000', () async {
       FlutterSecureStorage.setMockInitialValues({'backup_key': 'AAEC', 'backup_salt': 'AwQF'});

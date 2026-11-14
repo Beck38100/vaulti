@@ -88,10 +88,18 @@ class VaultRepository {
   }
 
   /// Délai avant verrouillage automatique. Voir [AutoLockDelay].
+  ///
+  /// Les lectures de réglages (ici et plus bas) ne lèvent jamais d'exception :
+  /// si le magasin de clés échoue, elles rendent la valeur la plus prudente et
+  /// l'application démarre quand même. Seul le coffre signale son échec
+  /// ([VaultUnreadableException]).
   Future<AutoLockDelay> readAutoLockDelay() async {
-    final raw = await _storage.read(key: _autoLockKey);
-    final seconds = int.tryParse(raw ?? '');
-    return AutoLockDelay.fromSeconds(seconds);
+    try {
+      final raw = await _storage.read(key: _autoLockKey);
+      return AutoLockDelay.fromSeconds(int.tryParse(raw ?? ''));
+    } catch (_) {
+      return AutoLockDelay.fromSeconds(null);
+    }
   }
 
   Future<void> saveAutoLockDelay(AutoLockDelay delay) {
@@ -100,8 +108,12 @@ class VaultRepository {
 
   /// Protection contre les captures d'écran. Activée par défaut.
   Future<bool> readScreenProtection() async {
-    final raw = await _storage.read(key: _screenProtectionKey);
-    return raw != 'off';
+    try {
+      final raw = await _storage.read(key: _screenProtectionKey);
+      return raw != 'off';
+    } catch (_) {
+      return true;
+    }
   }
 
   Future<void> saveScreenProtection(bool enabled) {
@@ -118,16 +130,18 @@ class VaultRepository {
   /// Le nombre d'itérations qui a produit la clé est conservé avec elle. Les clés
   /// enregistrées avant cette valeur datent de l'ancien format : 120 000.
   Future<({List<int> key, List<int> salt, int iterations})?> readBackupKey() async {
-    final key = await _storage.read(key: _backupKeyKey);
-    final salt = await _storage.read(key: _backupSaltKey);
-    if (key == null || salt == null) return null;
-    final stored = int.tryParse(await _storage.read(key: _backupIterationsKey) ?? '');
-    final iterations = stored != null && stored >= BackupCrypto.minIterations && stored <= BackupCrypto.maxIterations
-        ? stored
-        : BackupCrypto.legacyIterations;
     try {
+      final key = await _storage.read(key: _backupKeyKey);
+      final salt = await _storage.read(key: _backupSaltKey);
+      if (key == null || salt == null) return null;
+      final stored = int.tryParse(await _storage.read(key: _backupIterationsKey) ?? '');
+      final iterations = stored != null && stored >= BackupCrypto.minIterations && stored <= BackupCrypto.maxIterations
+          ? stored
+          : BackupCrypto.legacyIterations;
       return (key: base64Decode(key), salt: base64Decode(salt), iterations: iterations);
-    } on FormatException {
+    } catch (_) {
+      // Magasin de clés en erreur ou valeur mal encodée : comme sans clé, la
+      // sauvegarde n'est pas réécrite et la phrase redevient nécessaire.
       return null;
     }
   }
@@ -142,7 +156,11 @@ class VaultRepository {
   /// plupart des petites applications indépendantes, la validation reste
   /// côté appareil.
   Future<bool> readIsPremium() async {
-    return (await _storage.read(key: _isPremiumKey)) == 'on';
+    try {
+      return (await _storage.read(key: _isPremiumKey)) == 'on';
+    } catch (_) {
+      return false; // « Restaurer mon achat » redonne Premium auprès de Google Play
+    }
   }
 
   Future<void> saveIsPremium(bool isPremium) {

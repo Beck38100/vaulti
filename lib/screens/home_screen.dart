@@ -413,7 +413,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _loadUserName() async {
-    final name = await _repository.readUserName();
+    final String? name;
+    try {
+      name = await _repository.readUserName();
+    } catch (_) {
+      return; // magasin de clés en erreur : ni présentation ni demande de prénom à tort
+    }
     if (!mounted) return;
     if (name != null) {
       setState(() => _userName = name);
@@ -442,7 +447,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (_isPremium) return; // déjà pris en compte (restauration après achat)
     HapticFeedback.mediumImpact();
     setState(() => _isPremium = true);
-    await _repository.saveIsPremium(true);
+    try {
+      await _repository.saveIsPremium(true);
+    } catch (_) {
+      // Premium reste actif pour cette session ; « Restaurer mon achat » le redonnera.
+    }
     if (!mounted) return;
     _showMessage('Premium activé : plus aucune limite. Merci !');
   }
