@@ -75,7 +75,7 @@ Widget tests use `wrap()` and `fakeSession()` from `test/helpers.dart`.
 - The file is a JSON envelope `{version, kdf, iterations, salt, nonce, data, mac}`, encrypted with PBKDF2-HMAC-SHA256 and AES-256-GCM. Format version 2 (1.0.5 and later) reads the iteration count from the header, within 100 000 to 2 000 000, and uses 600 000 for new keys; version 1 files always use a fixed 120 000 and stay readable.
 - Keep `formatVersion` backward compatible.
 - The file name `vaulti-sauvegarde.vaulti` is hard-coded in `android/app/src/main/res/xml/backup_rules.xml` and `data_extraction_rules.xml`. It must stay in sync with `BackupService.fileName`.
-- Importing a backup **replaces** the whole vault and also adopts that file's passphrase as the backup passphrase.
+- Importing a backup into an **empty** vault restores it and adopts that file's passphrase as the backup passphrase (`_restoreFrom`). Into a non-empty vault the user chooses to merge or replace (`ImportMode`, `_applyImport`); the current backup passphrase is kept either way.
 - Changing the passphrase requires re-entering the current one first (`_confirmCurrentPassphrase`).
 
 **Premium.**
@@ -84,9 +84,10 @@ Widget tests use `wrap()` and `fakeSession()` from `test/helpers.dart`.
 - Validation is client-side only (`VaultRepository.saveIsPremium`); there is no server.
 - Billing only works on the `production` flavor installed **from a Play testing track**. It never works with `flutter run` or a sideloaded APK.
 
-**Native Android.** `android/app/src/main/kotlin/fr/vaulti/app/MainActivity.kt` exposes two method channels:
+**Native Android.** `android/app/src/main/kotlin/fr/vaulti/app/MainActivity.kt` exposes three method channels:
 - `vaulti/screen_security`: turns FLAG_SECURE on or off. It is on from `onCreate`.
 - `vaulti/secure_clipboard`: copies with `EXTRA_IS_SENSITIVE` and clears the clipboard only if it still holds Vaulti's own clip (checked by label, never by reading the content).
+- `vaulti/device_settings`: `openSecuritySettings` opens the screen-lock settings, falling back to the settings home on devices that don't expose it.
 
 ## Pitfalls
 
