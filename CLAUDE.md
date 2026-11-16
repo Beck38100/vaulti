@@ -26,7 +26,7 @@ flutter build apk --flavor dev --debug
 flutter build appbundle --flavor production --release --no-tree-shake-icons   # upload to Play Console
 ```
 
-- Release signing reads `android/key.properties` (gitignored). It points to `C:/Projet/Vaulti/vaulti-signing/`.
+- Release signing reads `android/key.properties` (gitignored). It points to the signing folder kept outside the repository (see PROJET.md).
 - Built artifacts are copied by hand to the sibling folder `../vaulti-releases/`.
 
 **Do not run `dart format` on whole files.** The code is hand-formatted with lines around 120 characters. The default 80-column formatter rewrites unrelated code and produces huge diffs.
