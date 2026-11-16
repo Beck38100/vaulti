@@ -127,10 +127,10 @@ de confidentialité de Google, indiquée plus haut. Vaulti n'y envoie aucune
 donnée personnelle.
 
 Le traitement de l'achat Premium est assuré par Google Play, selon sa propre
-politique de confidentialité. Vaulti n'envoie aucune donnée de ton coffre
+politique de confidentialité. Vaulti n'envoie aucune donnée de votre coffre
 (mots de passe, notes, dossiers) vers un serveur ; seule la sauvegarde
 automatique d'Android, décrite plus haut, peut déposer une copie chiffrée du
-fichier de sauvegarde sur ton compte Google.
+fichier de sauvegarde sur votre compte Google.
 
 ## 8. Presse-papiers
 
