@@ -1,6 +1,6 @@
 # Politique de confidentialité — Vaulti
 
-**Dernière mise à jour : 28 octobre 2026**
+**Dernière mise à jour : 16 novembre 2026**
 
 Vaulti est un gestionnaire de mots de passe qui fonctionne entièrement sur votre
 téléphone. Cette politique explique quelles données l'application manipule, où
@@ -125,6 +125,12 @@ la permission. La bibliothèque Google Play Facturation, fournie par Google,
 peut échanger des données techniques avec Google. Cela relève de la politique
 de confidentialité de Google, indiquée plus haut. Vaulti n'y envoie aucune
 donnée personnelle.
+
+Le traitement de l'achat Premium est assuré par Google Play, selon sa propre
+politique de confidentialité. Vaulti n'envoie aucune donnée de ton coffre
+(mots de passe, notes, dossiers) vers un serveur ; seule la sauvegarde
+automatique d'Android, décrite plus haut, peut déposer une copie chiffrée du
+fichier de sauvegarde sur ton compte Google.
 
 ## 8. Presse-papiers
 
