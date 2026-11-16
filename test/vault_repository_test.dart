@@ -92,6 +92,21 @@ void main() {
     });
   });
 
+  group('options du stockage sécurisé', () {
+    test('resetOnError est désactivé', () {
+      final options = VaultRepository.secureStorage.aOptions.toMap();
+
+      expect(options['resetOnError'], 'false');
+    });
+
+    test('les autres options, qui décident de l’emplacement et du chiffrement, restent celles du plugin', () {
+      final mine = VaultRepository.secureStorage.aOptions.toMap();
+      final plugin = const FlutterSecureStorage().aOptions.toMap();
+
+      expect({...mine}..remove('resetOnError'), {...plugin}..remove('resetOnError'));
+    });
+  });
+
   group('lectures de réglages quand le magasin de clés échoue', () {
     test('aucune ne lève d’exception : valeurs prudentes, l’appli démarre', () async {
       final repository = VaultRepository(_FailingStorage(), tempMarker());

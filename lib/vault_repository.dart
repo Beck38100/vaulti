@@ -19,9 +19,15 @@ class VaultUnreadableException implements Exception {
 /// Accès au stockage sécurisé de l'appareil (chiffré par le système).
 class VaultRepository {
   const VaultRepository([
-    this._storage = const FlutterSecureStorage(),
+    this._storage = secureStorage,
     this._marker = const VaultMarker(),
   ]);
+
+  /// Stockage sécurisé de l'application, avec `resetOnError` désactivé : une
+  /// erreur du magasin de clés remonte à l'application, qui propose la
+  /// récupération par sauvegarde. Ne change ni l'emplacement ni le chiffrement
+  /// des données déjà enregistrées.
+  static const secureStorage = FlutterSecureStorage(aOptions: AndroidOptions(resetOnError: false));
 
   final FlutterSecureStorage _storage;
   final VaultMarker _marker;
