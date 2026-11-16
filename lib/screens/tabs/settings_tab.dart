@@ -139,6 +139,14 @@ class SettingsTab extends StatelessWidget {
             onTap: () => _openFeedbackForm(context),
           ),
         ]),
+        const SizedBox(height: 22),
+        Text('Confidentialité', style: TextStyle(color: Colors.grey.shade400, fontSize: 13, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 6),
+        Text(
+          'Vaulti ne collecte aucune donnée. Tes mots de passe restent chiffrés sur ton téléphone. '
+          'L’achat Premium est géré par Google Play.',
+          style: TextStyle(color: Colors.grey.shade500, fontSize: 12.5, height: 1.4),
+        ),
       ],
     );
   }
