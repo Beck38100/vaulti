@@ -72,12 +72,13 @@ Future<String?> askUserName(
 }
 
 /// Ce que l'utilisateur décide quand le coffre enregistré est illisible.
-enum VaultRecovery { retry, restoreBackup, startEmpty }
+enum VaultRecovery { retry, restoreLocalBackup, restoreBackup, startEmpty }
 
 /// Annonce que le coffre n'a pas pu être lu et laisse l'utilisateur décider.
 /// La fenêtre ne se ferme pas sans réponse : tant qu'il n'a pas choisi, rien
-/// n'est écrit par-dessus le coffre existant.
-Future<VaultRecovery> askVaultRecovery(BuildContext context) async {
+/// n'est écrit par-dessus le coffre existant. [hasLocalBackup] ajoute la
+/// restauration de la sauvegarde chiffrée qui se trouve sur ce téléphone.
+Future<VaultRecovery> askVaultRecovery(BuildContext context, {bool hasLocalBackup = false}) async {
   final choice = await showDialog<VaultRecovery>(
     context: context,
     barrierDismissible: false,
@@ -90,6 +91,7 @@ Future<VaultRecovery> askVaultRecovery(BuildContext context) async {
         content: Text(
           'Vaulti n’arrive pas à lire ou à retrouver ton coffre sur ce téléphone. '
           'Il n’écrit rien tant que tu n’as pas choisi.\n\n'
+          '${hasLocalBackup ? 'Une sauvegarde chiffrée de ce téléphone est disponible : tu peux la restaurer avec ton mot de passe de sauvegarde. ' : ''}'
           'Tu peux réessayer, importer une sauvegarde chiffrée, ou repartir d’un coffre vide : '
           'le coffre illisible serait alors remplacé.',
           style: TextStyle(color: Colors.grey.shade400, fontSize: 13.5, height: 1.4),
@@ -100,6 +102,11 @@ Future<VaultRecovery> askVaultRecovery(BuildContext context) async {
             onPressed: () => closeDialog(ctx, VaultRecovery.startEmpty),
             child: Text('Repartir d’un coffre vide', style: TextStyle(color: Colors.grey.shade400)),
           ),
+          if (hasLocalBackup)
+            TextButton(
+              onPressed: () => closeDialog(ctx, VaultRecovery.restoreLocalBackup),
+              child: const Text('Restaurer la sauvegarde de ce téléphone'),
+            ),
           TextButton(
             onPressed: () => closeDialog(ctx, VaultRecovery.restoreBackup),
             child: const Text('Importer une sauvegarde'),

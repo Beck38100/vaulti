@@ -92,6 +92,60 @@ void main() {
     });
   });
 
+  group('options du stockage sécurisé', () {
+    test('resetOnError est désactivé', () {
+      final options = VaultRepository.secureStorage.aOptions.toMap();
+
+      expect(options['resetOnError'], 'false');
+    });
+
+    test('les autres options, qui décident de l’emplacement et du chiffrement, restent celles du plugin', () {
+      final mine = VaultRepository.secureStorage.aOptions.toMap();
+      final plugin = const FlutterSecureStorage().aOptions.toMap();
+
+      expect({...mine}..remove('resetOnError'), {...plugin}..remove('resetOnError'));
+    });
+  });
+
+  group('lectures de réglages quand le magasin de clés échoue', () {
+    test('aucune ne lève d’exception : valeurs prudentes, l’appli démarre', () async {
+      final repository = VaultRepository(_FailingStorage(), tempMarker());
+
+      expect(await repository.readAutoLockDelay(), AutoLockDelay.fromSeconds(null));
+      expect(await repository.readScreenProtection(), isTrue);
+      expect(await repository.readIsPremium(), isFalse);
+    });
+
+    test('la clé de sauvegarde non relue se distingue d’une clé absente', () async {
+      await expectLater(
+        VaultRepository(_FailingStorage(), tempMarker()).readBackupKey(),
+        throwsA(isA<BackupKeyUnreadableException>()),
+      );
+
+      FlutterSecureStorage.setMockInitialValues({});
+      expect(await VaultRepository(const FlutterSecureStorage(), tempMarker()).readBackupKey(), isNull);
+    });
+
+    test('la protection d’écran reste active par défaut, même en erreur', () async {
+      expect(await VaultRepository(_FailingStorage(), tempMarker()).readScreenProtection(), isTrue);
+    });
+
+    test('une valeur mal encodée pour la clé de sauvegarde donne « aucune clé »', () async {
+      FlutterSecureStorage.setMockInitialValues({'backup_key': '***', 'backup_salt': '***'});
+
+      expect(await VaultRepository(const FlutterSecureStorage(), tempMarker()).readBackupKey(), isNull);
+    });
+
+    test('un stockage qui répond normalement donne toujours les vraies valeurs', () async {
+      FlutterSecureStorage.setMockInitialValues({'is_premium': 'on', 'screen_protection': 'off', 'auto_lock_seconds': '300'});
+      final repository = VaultRepository(const FlutterSecureStorage(), tempMarker());
+
+      expect(await repository.readIsPremium(), isTrue);
+      expect(await repository.readScreenProtection(), isFalse);
+      expect((await repository.readAutoLockDelay()).seconds, 300);
+    });
+  });
+
   group('clé de sauvegarde et itérations', () {
     test('une clé enregistrée sans valeur d’itérations (ancienne version) vaut 120 000', () async {
       FlutterSecureStorage.setMockInitialValues({'backup_key': 'AAEC', 'backup_salt': 'AwQF'});
@@ -124,10 +178,13 @@ void main() {
   });
 
   group('fenêtre « coffre illisible »', () {
-    Future<Future<VaultRecovery>> open(WidgetTester tester) async {
+    Future<Future<VaultRecovery>> open(WidgetTester tester, {bool hasLocalBackup = false}) async {
       late Future<VaultRecovery> result;
       await tester.pumpWidget(wrap(Builder(builder: (context) {
-        return ElevatedButton(onPressed: () => result = askVaultRecovery(context), child: const Text('ouvrir'));
+        return ElevatedButton(
+          onPressed: () => result = askVaultRecovery(context, hasLocalBackup: hasLocalBackup),
+          child: const Text('ouvrir'),
+        );
       })));
       await tester.tap(find.text('ouvrir'));
       await tester.pumpAndSettle();
@@ -141,6 +198,26 @@ void main() {
       expect(find.text('Réessayer'), findsOneWidget);
       expect(find.text('Importer une sauvegarde'), findsOneWidget);
       expect(find.text('Repartir d’un coffre vide'), findsOneWidget);
+    });
+
+    testWidgets('sans sauvegarde sur le téléphone, la restauration interne n’est pas proposée', (tester) async {
+      await open(tester);
+
+      expect(find.text('Restaurer la sauvegarde de ce téléphone'), findsNothing);
+    });
+
+    testWidgets('avec une sauvegarde sur le téléphone, elle est proposée en plus de l’import', (tester) async {
+      final result = await open(tester, hasLocalBackup: true);
+
+      expect(find.text('Restaurer la sauvegarde de ce téléphone'), findsOneWidget);
+      expect(find.text('Importer une sauvegarde'), findsOneWidget);
+      expect(find.text('Réessayer'), findsOneWidget);
+      expect(find.text('Repartir d’un coffre vide'), findsOneWidget);
+
+      await tester.tap(find.text('Restaurer la sauvegarde de ce téléphone'));
+      await tester.pumpAndSettle();
+
+      expect(await result, VaultRecovery.restoreLocalBackup);
     });
 
     testWidgets('ne se ferme pas en touchant à côté', (tester) async {

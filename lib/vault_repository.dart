@@ -16,12 +16,25 @@ class VaultUnreadableException implements Exception {
   String toString() => 'Coffre illisible';
 }
 
+/// La clé de sauvegarde existe peut-être, mais le magasin de clés n'a pas
+/// répondu. Distinct de « aucune clé » : le mot de passe de sauvegarde actuel
+/// ne peut pas être vérifié.
+class BackupKeyUnreadableException implements Exception {
+  const BackupKeyUnreadableException();
+}
+
 /// Accès au stockage sécurisé de l'appareil (chiffré par le système).
 class VaultRepository {
   const VaultRepository([
-    this._storage = const FlutterSecureStorage(),
+    this._storage = secureStorage,
     this._marker = const VaultMarker(),
   ]);
+
+  /// Stockage sécurisé de l'application, avec `resetOnError` désactivé : une
+  /// erreur du magasin de clés remonte à l'application, qui propose la
+  /// récupération par sauvegarde. Ne change ni l'emplacement ni le chiffrement
+  /// des données déjà enregistrées.
+  static const secureStorage = FlutterSecureStorage(aOptions: AndroidOptions(resetOnError: false));
 
   final FlutterSecureStorage _storage;
   final VaultMarker _marker;
@@ -88,10 +101,19 @@ class VaultRepository {
   }
 
   /// Délai avant verrouillage automatique. Voir [AutoLockDelay].
+  ///
+  /// Les lectures de réglages (ici et plus bas) ne lèvent jamais d'exception :
+  /// si le magasin de clés échoue, elles rendent la valeur la plus prudente et
+  /// l'application démarre quand même. Seuls le coffre et la clé de sauvegarde
+  /// signalent leur échec ([VaultUnreadableException],
+  /// [BackupKeyUnreadableException]).
   Future<AutoLockDelay> readAutoLockDelay() async {
-    final raw = await _storage.read(key: _autoLockKey);
-    final seconds = int.tryParse(raw ?? '');
-    return AutoLockDelay.fromSeconds(seconds);
+    try {
+      final raw = await _storage.read(key: _autoLockKey);
+      return AutoLockDelay.fromSeconds(int.tryParse(raw ?? ''));
+    } catch (_) {
+      return AutoLockDelay.fromSeconds(null);
+    }
   }
 
   Future<void> saveAutoLockDelay(AutoLockDelay delay) {
@@ -100,8 +122,12 @@ class VaultRepository {
 
   /// Protection contre les captures d'écran. Activée par défaut.
   Future<bool> readScreenProtection() async {
-    final raw = await _storage.read(key: _screenProtectionKey);
-    return raw != 'off';
+    try {
+      final raw = await _storage.read(key: _screenProtectionKey);
+      return raw != 'off';
+    } catch (_) {
+      return true;
+    }
   }
 
   Future<void> saveScreenProtection(bool enabled) {
@@ -117,11 +143,23 @@ class VaultRepository {
   ///
   /// Le nombre d'itérations qui a produit la clé est conservé avec elle. Les clés
   /// enregistrées avant cette valeur datent de l'ancien format : 120 000.
+  ///
+  /// Renvoie null s'il n'y a aucune clé (ou une valeur mal encodée). Si le
+  /// magasin de clés ne répond pas, lève [BackupKeyUnreadableException] :
+  /// l'appelant distingue ainsi « pas de clé » de « clé non relue ».
   Future<({List<int> key, List<int> salt, int iterations})?> readBackupKey() async {
-    final key = await _storage.read(key: _backupKeyKey);
-    final salt = await _storage.read(key: _backupSaltKey);
+    final String? key;
+    final String? salt;
+    final String? rawIterations;
+    try {
+      key = await _storage.read(key: _backupKeyKey);
+      salt = await _storage.read(key: _backupSaltKey);
+      rawIterations = key == null || salt == null ? null : await _storage.read(key: _backupIterationsKey);
+    } catch (_) {
+      throw const BackupKeyUnreadableException();
+    }
     if (key == null || salt == null) return null;
-    final stored = int.tryParse(await _storage.read(key: _backupIterationsKey) ?? '');
+    final stored = int.tryParse(rawIterations ?? '');
     final iterations = stored != null && stored >= BackupCrypto.minIterations && stored <= BackupCrypto.maxIterations
         ? stored
         : BackupCrypto.legacyIterations;
@@ -142,7 +180,11 @@ class VaultRepository {
   /// plupart des petites applications indépendantes, la validation reste
   /// côté appareil.
   Future<bool> readIsPremium() async {
-    return (await _storage.read(key: _isPremiumKey)) == 'on';
+    try {
+      return (await _storage.read(key: _isPremiumKey)) == 'on';
+    } catch (_) {
+      return false; // « Restaurer mon achat » redonne Premium auprès de Google Play
+    }
   }
 
   Future<void> saveIsPremium(bool isPremium) {

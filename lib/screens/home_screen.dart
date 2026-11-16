@@ -68,6 +68,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   SecretKey? _backupKey;
   List<int>? _backupSalt;
 
+  /// Une clé de sauvegarde est peut-être enregistrée, mais n'a pas pu être relue
+  /// au démarrage : le mot de passe de sauvegarde ne peut pas être remplacé.
+  bool _backupKeyUnreadable = false;
+
   /// Itérations qui ont produit [_backupKey] : écrites dans chaque sauvegarde.
   int _backupIterations = BackupCrypto.legacyIterations;
 
@@ -206,6 +210,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           _backupKey = restored.key;
           _backupSalt = restored.salt;
           _backupIterations = restored.iterations;
+          _backupKeyUnreadable = false;
           _vaultUnreadable = false;
         });
         await _repository.saveVault(restored.data);
@@ -226,6 +231,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// d'autre tombé sur le téléphone déverrouillé — verrouillerait le vrai
   /// propriétaire hors de ses futures sauvegardes sans qu'il s'en rende compte.
   Future<void> _configureBackupPassphrase() async {
+    if (_backupKeyUnreadable) {
+      _showMessage(
+        'Le mot de passe de sauvegarde actuel n’a pas pu être relu sur ce téléphone. '
+        'Ferme et rouvre l’application pour réessayer.',
+        isWarning: true,
+      );
+      return;
+    }
     final isChange = _backupKey != null;
     if (isChange && !await _confirmCurrentPassphrase()) return;
     if (!mounted) return;
@@ -385,35 +398,60 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       } on VaultUnreadableException {
         if (!mounted) return;
         _vaultUnreadable = true;
-        final choice = await askVaultRecovery(context);
+        final localBackup = await _readLocalBackup();
         if (!mounted) return;
-        switch (choice) {
-          case VaultRecovery.retry:
-            break;
-          case VaultRecovery.restoreBackup:
-            await _importBackup();
-            if (!_vaultUnreadable) return;
-          case VaultRecovery.startEmpty:
-            final confirmed = await confirmDelete(
-              context,
-              title: 'Repartir d’un coffre vide ?',
-              message: 'Le coffre illisible sera remplacé par un coffre vide. Cette action est définitive.',
-            );
-            if (!confirmed || !mounted) break;
-            setState(() {
-              _folders = [];
-              _entries = [];
-              _vaultUnreadable = false;
-            });
-            await _save();
-            return;
+        final choice = await askVaultRecovery(context, hasLocalBackup: localBackup != null);
+        if (!mounted) return;
+        try {
+          switch (choice) {
+            case VaultRecovery.retry:
+              break;
+            case VaultRecovery.restoreLocalBackup:
+              if (localBackup == null) break;
+              await _restoreFrom(localBackup, message: 'Saisis le mot de passe qui protège la sauvegarde de ce téléphone.');
+              if (!_vaultUnreadable) return;
+            case VaultRecovery.restoreBackup:
+              await _importBackup();
+              if (!_vaultUnreadable) return;
+            case VaultRecovery.startEmpty:
+              final confirmed = await confirmDelete(
+                context,
+                title: 'Repartir d’un coffre vide ?',
+                message: 'Le coffre illisible sera remplacé par un coffre vide. Cette action est définitive.',
+              );
+              if (!confirmed || !mounted) break;
+              setState(() {
+                _folders = [];
+                _entries = [];
+                _vaultUnreadable = false;
+              });
+              await _save();
+              return;
+          }
+        } catch (_) {
+          // Le stockage sécurisé refuse l'écriture : on revient à la fenêtre, rien n'est perdu.
+          if (mounted) _showMessage('Le stockage sécurisé du téléphone refuse l’écriture. Réessaie plus tard.', isWarning: true);
         }
       }
     }
   }
 
+  /// Sauvegarde chiffrée de ce téléphone, ou null s'il n'y en a pas (ou si elle est illisible).
+  Future<String?> _readLocalBackup() async {
+    try {
+      return await _backup.readEnvelope();
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> _loadUserName() async {
-    final name = await _repository.readUserName();
+    final String? name;
+    try {
+      name = await _repository.readUserName();
+    } catch (_) {
+      return; // magasin de clés en erreur : ni présentation ni demande de prénom à tort
+    }
     if (!mounted) return;
     if (name != null) {
       setState(() => _userName = name);
@@ -442,7 +480,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (_isPremium) return; // déjà pris en compte (restauration après achat)
     HapticFeedback.mediumImpact();
     setState(() => _isPremium = true);
-    await _repository.saveIsPremium(true);
+    try {
+      await _repository.saveIsPremium(true);
+    } catch (_) {
+      // Premium reste actif pour cette session ; « Restaurer mon achat » le redonnera.
+    }
     if (!mounted) return;
     _showMessage('Premium activé : plus aucune limite. Merci !');
   }
@@ -512,17 +554,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _loadBackupKey() async {
-    final stored = await _repository.readBackupKey();
+    final ({List<int> key, List<int> salt, int iterations})? stored;
+    try {
+      stored = await _repository.readBackupKey();
+    } on BackupKeyUnreadableException {
+      // La clé n'a pas pu être relue : pas de réécriture de la sauvegarde, et le
+      // mot de passe ne peut pas être remplacé tant qu'elle reste illisible.
+      if (mounted) setState(() => _backupKeyUnreadable = true);
+      return;
+    }
     if (stored == null || !mounted) {
       // Aucune clé locale : soit rien n'est configuré, soit l'appareil est
       // neuf et une sauvegarde restaurée par Android attend une phrase.
       if (mounted) await _offerRestoreIfAvailable();
       return;
     }
+    final found = stored;
     setState(() {
-      _backupKey = SecretKey(stored.key);
-      _backupSalt = stored.salt;
-      _backupIterations = stored.iterations;
+      _backupKey = SecretKey(found.key);
+      _backupSalt = found.salt;
+      _backupIterations = found.iterations;
     });
   }
 
