@@ -16,6 +16,13 @@ class VaultUnreadableException implements Exception {
   String toString() => 'Coffre illisible';
 }
 
+/// La clé de sauvegarde existe peut-être, mais le magasin de clés n'a pas
+/// répondu. Distinct de « aucune clé » : le mot de passe de sauvegarde actuel
+/// ne peut pas être vérifié.
+class BackupKeyUnreadableException implements Exception {
+  const BackupKeyUnreadableException();
+}
+
 /// Accès au stockage sécurisé de l'appareil (chiffré par le système).
 class VaultRepository {
   const VaultRepository([
@@ -97,8 +104,9 @@ class VaultRepository {
   ///
   /// Les lectures de réglages (ici et plus bas) ne lèvent jamais d'exception :
   /// si le magasin de clés échoue, elles rendent la valeur la plus prudente et
-  /// l'application démarre quand même. Seul le coffre signale son échec
-  /// ([VaultUnreadableException]).
+  /// l'application démarre quand même. Seuls le coffre et la clé de sauvegarde
+  /// signalent leur échec ([VaultUnreadableException],
+  /// [BackupKeyUnreadableException]).
   Future<AutoLockDelay> readAutoLockDelay() async {
     try {
       final raw = await _storage.read(key: _autoLockKey);
@@ -135,19 +143,29 @@ class VaultRepository {
   ///
   /// Le nombre d'itérations qui a produit la clé est conservé avec elle. Les clés
   /// enregistrées avant cette valeur datent de l'ancien format : 120 000.
+  ///
+  /// Renvoie null s'il n'y a aucune clé (ou une valeur mal encodée). Si le
+  /// magasin de clés ne répond pas, lève [BackupKeyUnreadableException] :
+  /// l'appelant distingue ainsi « pas de clé » de « clé non relue ».
   Future<({List<int> key, List<int> salt, int iterations})?> readBackupKey() async {
+    final String? key;
+    final String? salt;
+    final String? rawIterations;
     try {
-      final key = await _storage.read(key: _backupKeyKey);
-      final salt = await _storage.read(key: _backupSaltKey);
-      if (key == null || salt == null) return null;
-      final stored = int.tryParse(await _storage.read(key: _backupIterationsKey) ?? '');
-      final iterations = stored != null && stored >= BackupCrypto.minIterations && stored <= BackupCrypto.maxIterations
-          ? stored
-          : BackupCrypto.legacyIterations;
-      return (key: base64Decode(key), salt: base64Decode(salt), iterations: iterations);
+      key = await _storage.read(key: _backupKeyKey);
+      salt = await _storage.read(key: _backupSaltKey);
+      rawIterations = key == null || salt == null ? null : await _storage.read(key: _backupIterationsKey);
     } catch (_) {
-      // Magasin de clés en erreur ou valeur mal encodée : comme sans clé, la
-      // sauvegarde n'est pas réécrite et la phrase redevient nécessaire.
+      throw const BackupKeyUnreadableException();
+    }
+    if (key == null || salt == null) return null;
+    final stored = int.tryParse(rawIterations ?? '');
+    final iterations = stored != null && stored >= BackupCrypto.minIterations && stored <= BackupCrypto.maxIterations
+        ? stored
+        : BackupCrypto.legacyIterations;
+    try {
+      return (key: base64Decode(key), salt: base64Decode(salt), iterations: iterations);
+    } on FormatException {
       return null;
     }
   }

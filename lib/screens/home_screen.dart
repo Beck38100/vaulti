@@ -68,6 +68,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   SecretKey? _backupKey;
   List<int>? _backupSalt;
 
+  /// Une clé de sauvegarde est peut-être enregistrée, mais n'a pas pu être relue
+  /// au démarrage : le mot de passe de sauvegarde ne peut pas être remplacé.
+  bool _backupKeyUnreadable = false;
+
   /// Itérations qui ont produit [_backupKey] : écrites dans chaque sauvegarde.
   int _backupIterations = BackupCrypto.legacyIterations;
 
@@ -206,6 +210,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           _backupKey = restored.key;
           _backupSalt = restored.salt;
           _backupIterations = restored.iterations;
+          _backupKeyUnreadable = false;
           _vaultUnreadable = false;
         });
         await _repository.saveVault(restored.data);
@@ -226,6 +231,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// d'autre tombé sur le téléphone déverrouillé — verrouillerait le vrai
   /// propriétaire hors de ses futures sauvegardes sans qu'il s'en rende compte.
   Future<void> _configureBackupPassphrase() async {
+    if (_backupKeyUnreadable) {
+      _showMessage(
+        'Le mot de passe de sauvegarde actuel n’a pas pu être relu sur ce téléphone. '
+        'Ferme et rouvre l’application pour réessayer.',
+        isWarning: true,
+      );
+      return;
+    }
     final isChange = _backupKey != null;
     if (isChange && !await _confirmCurrentPassphrase()) return;
     if (!mounted) return;
@@ -541,17 +554,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _loadBackupKey() async {
-    final stored = await _repository.readBackupKey();
+    final ({List<int> key, List<int> salt, int iterations})? stored;
+    try {
+      stored = await _repository.readBackupKey();
+    } on BackupKeyUnreadableException {
+      // La clé n'a pas pu être relue : pas de réécriture de la sauvegarde, et le
+      // mot de passe ne peut pas être remplacé tant qu'elle reste illisible.
+      if (mounted) setState(() => _backupKeyUnreadable = true);
+      return;
+    }
     if (stored == null || !mounted) {
       // Aucune clé locale : soit rien n'est configuré, soit l'appareil est
       // neuf et une sauvegarde restaurée par Android attend une phrase.
       if (mounted) await _offerRestoreIfAvailable();
       return;
     }
+    final found = stored;
     setState(() {
-      _backupKey = SecretKey(stored.key);
-      _backupSalt = stored.salt;
-      _backupIterations = stored.iterations;
+      _backupKey = SecretKey(found.key);
+      _backupSalt = found.salt;
+      _backupIterations = found.iterations;
     });
   }
 

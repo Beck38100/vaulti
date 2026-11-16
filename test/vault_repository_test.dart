@@ -114,7 +114,16 @@ void main() {
       expect(await repository.readAutoLockDelay(), AutoLockDelay.fromSeconds(null));
       expect(await repository.readScreenProtection(), isTrue);
       expect(await repository.readIsPremium(), isFalse);
-      expect(await repository.readBackupKey(), isNull);
+    });
+
+    test('la clé de sauvegarde non relue se distingue d’une clé absente', () async {
+      await expectLater(
+        VaultRepository(_FailingStorage(), tempMarker()).readBackupKey(),
+        throwsA(isA<BackupKeyUnreadableException>()),
+      );
+
+      FlutterSecureStorage.setMockInitialValues({});
+      expect(await VaultRepository(const FlutterSecureStorage(), tempMarker()).readBackupKey(), isNull);
     });
 
     test('la protection d’écran reste active par défaut, même en erreur', () async {
