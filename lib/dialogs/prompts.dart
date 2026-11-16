@@ -96,29 +96,34 @@ Future<VaultRecovery> askVaultRecovery(BuildContext context, {bool hasLocalBacku
           'le coffre illisible serait alors remplacé.',
           style: TextStyle(color: Colors.grey.shade400, fontSize: 13.5, height: 1.4),
         ),
-        actionsOverflowDirection: VerticalDirection.down,
+        // Les choix sont empilés, à pleine largeur : leurs libellés sont longs et ne tiennent pas côte à côte.
         actions: [
-          TextButton(
-            onPressed: () => closeDialog(ctx, VaultRecovery.startEmpty),
-            child: Text('Repartir d’un coffre vide', style: TextStyle(color: Colors.grey.shade400)),
-          ),
-          if (hasLocalBackup)
-            TextButton(
-              onPressed: () => closeDialog(ctx, VaultRecovery.restoreLocalBackup),
-              child: const Text('Restaurer la sauvegarde de ce téléphone'),
-            ),
-          TextButton(
-            onPressed: () => closeDialog(ctx, VaultRecovery.restoreBackup),
-            child: const Text('Importer une sauvegarde'),
-          ),
-          FilledButton(
-            onPressed: () => closeDialog(ctx, VaultRecovery.retry),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.signature,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            ),
-            child: const Text('Réessayer'),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FilledButton(
+                onPressed: () => closeDialog(ctx, VaultRecovery.retry),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.signature,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                child: const Text('Réessayer'),
+              ),
+              if (hasLocalBackup)
+                TextButton(
+                  onPressed: () => closeDialog(ctx, VaultRecovery.restoreLocalBackup),
+                  child: const Text('Restaurer la sauvegarde de ce téléphone', textAlign: TextAlign.center),
+                ),
+              TextButton(
+                onPressed: () => closeDialog(ctx, VaultRecovery.restoreBackup),
+                child: const Text('Importer une sauvegarde', textAlign: TextAlign.center),
+              ),
+              TextButton(
+                onPressed: () => closeDialog(ctx, VaultRecovery.startEmpty),
+                child: Text('Repartir d’un coffre vide', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade400)),
+              ),
+            ],
           ),
         ],
       ),
