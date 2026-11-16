@@ -21,7 +21,7 @@ class ScreenSecurity {
     } on PlatformException {
       // Fonction non disponible : on continue sans bloquer l'application.
     } on MissingPluginException {
-      // Ancienne version installée sans le canal natif.
+      // Canal natif absent : exécution sans le code Android (un test, par exemple).
     }
   }
 }

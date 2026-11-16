@@ -9,6 +9,8 @@ import 'package:vaulti/models.dart';
 /// la phrase secrète est connue.
 void main() {
   const crypto = BackupCrypto();
+  // Le minimum autorisé suffit pour tester le circuit sans ralentir la suite.
+  const iterations = BackupCrypto.minIterations;
 
   VaultData sampleVault() => VaultData(
         folders: [VaultFolder(id: 'f1', title: 'Banque')],
@@ -31,15 +33,20 @@ void main() {
 
     // Ancien téléphone : on chiffre le coffre.
     final salt = crypto.newSalt();
-    final key = await crypto.deriveKey(passphrase, salt);
+    final key = await crypto.deriveKey(passphrase, salt, iterations: iterations);
     final envelope = await crypto.encrypt(
       plainText: jsonEncode(sampleVault().toJson()),
       key: key,
       salt: salt,
+      iterations: iterations,
     );
 
     // Nouveau téléphone : rien en mémoire, seule la phrase est connue.
-    final recoveredKey = await crypto.deriveKey(passphrase, crypto.saltOf(envelope));
+    final recoveredKey = await crypto.deriveKey(
+      passphrase,
+      crypto.saltOf(envelope),
+      iterations: crypto.iterationsOf(envelope),
+    );
     final clear = await crypto.decrypt(envelope: envelope, key: recoveredKey);
     final restored = VaultData.fromDecoded(jsonDecode(clear));
 
@@ -59,11 +66,12 @@ void main() {
 
   test('sans la phrase, la sauvegarde reste inexploitable', () async {
     final salt = crypto.newSalt();
-    final key = await crypto.deriveKey('la vraie phrase', salt);
+    final key = await crypto.deriveKey('la vraie phrase', salt, iterations: iterations);
     final envelope = await crypto.encrypt(
       plainText: jsonEncode(sampleVault().toJson()),
       key: key,
       salt: salt,
+      iterations: iterations,
     );
 
     // Aucun mot de passe ne doit transparaître dans le fichier.
@@ -71,7 +79,11 @@ void main() {
     expect(envelope.contains('jean.dupont'), isFalse);
     expect(envelope.contains('Banque'), isFalse);
 
-    final wrongKey = await crypto.deriveKey('une autre phrase', crypto.saltOf(envelope));
+    final wrongKey = await crypto.deriveKey(
+      'une autre phrase',
+      crypto.saltOf(envelope),
+      iterations: crypto.iterationsOf(envelope),
+    );
     expect(
       () => crypto.decrypt(envelope: envelope, key: wrongKey),
       throwsA(isA<BackupDecryptException>()),
@@ -80,11 +92,12 @@ void main() {
 
   test('un coffre vide se sauvegarde et se restaure sans erreur', () async {
     final salt = crypto.newSalt();
-    final key = await crypto.deriveKey('phrase', salt);
+    final key = await crypto.deriveKey('phrase', salt, iterations: iterations);
     final envelope = await crypto.encrypt(
       plainText: jsonEncode(VaultData.empty().toJson()),
       key: key,
       salt: salt,
+      iterations: iterations,
     );
 
     final clear = await crypto.decrypt(envelope: envelope, key: key);

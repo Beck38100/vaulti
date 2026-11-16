@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:cryptography/helpers.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'backup_crypto.dart';
@@ -65,6 +66,19 @@ class BackupService {
 
     final decoded = jsonDecode(clear);
     return (data: VaultData.fromDecoded(decoded), key: key, salt: salt, iterations: iterations);
+  }
+
+  /// Indique si [passphrase] est celle qui a produit [key], la clé conservée sur
+  /// l'appareil avec son [salt] et ses [iterations]. Les deux clés sont comparées
+  /// à temps constant, pour ne rien laisser deviner par la durée de la réponse.
+  Future<bool> matchesKey(
+    String passphrase, {
+    required List<int> key,
+    required List<int> salt,
+    required int iterations,
+  }) async {
+    final candidate = await _crypto.deriveKey(passphrase, salt, iterations: iterations);
+    return constantTimeBytesEquality.equals(await candidate.extractBytes(), key);
   }
 
   /// Prépare une nouvelle protection à partir d'une phrase secrète choisie.

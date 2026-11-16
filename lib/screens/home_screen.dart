@@ -246,12 +246,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _showMessage(isChange ? 'Mot de passe de sauvegarde modifié.' : 'Sauvegarde protégée. Note bien ton mot de passe.');
   }
 
-  /// Redemande la phrase actuelle avant un changement, en la vérifiant contre
-  /// la sauvegarde déjà chiffrée avec elle. Réessaie tant qu'elle est
-  /// refusée, sauf si l'utilisateur renonce.
+  /// Redemande la phrase actuelle avant un changement, en la comparant à la clé
+  /// de sauvegarde conservée sur l'appareil. Réessaie tant qu'elle est refusée,
+  /// sauf si l'utilisateur renonce.
   Future<bool> _confirmCurrentPassphrase() async {
-    final envelope = await _backup.readEnvelope();
-    if (envelope == null || !mounted) return true; // rien à vérifier contre
+    final key = _backupKey;
+    final salt = _backupSalt;
+    if (key == null) return true; // aucune clé conservée : rien à vérifier contre
+    if (salt == null) return false; // clé sans sel : ne devrait pas arriver, on refuse
+    final keyBytes = await key.extractBytes();
 
     String? errorText;
     while (true) {
@@ -263,13 +266,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       );
       if (current == null) return false;
 
-      try {
-        await _backup.restore(envelope, current);
-        return true;
-      } on BackupDecryptException catch (error) {
-        if (!mounted) return false;
-        errorText = error.reason;
-      }
+      final matches = await _backup.matchesKey(current, key: keyBytes, salt: salt, iterations: _backupIterations);
+      if (matches) return true;
+      if (!mounted) return false;
+      errorText = 'Mot de passe incorrect.';
     }
   }
 
